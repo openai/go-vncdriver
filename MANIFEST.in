@@ -1,0 +1,7 @@
+include Makefile build.sh
+include Godeps/Godeps.json
+recursive-include vendor *.h *.m
+global-include *.go *.c
+prune .build
+prune dist
+prune build

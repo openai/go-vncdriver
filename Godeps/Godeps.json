@@ -1,0 +1,52 @@
+{
+	"ImportPath": "github.com/openai/universe/go-vncdriver",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v75",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/cheggaaa/pb",
+			"Comment": "v1.0.6",
+			"Rev": "dd61faab99a777c652bb680e37715fe0cb549856"
+		},
+		{
+			"ImportPath": "github.com/go-gl/gl/v2.1/gl",
+			"Rev": "cd1cf4a9b229045e8a41d5945fc597617e8bae4f"
+		},
+		{
+			"ImportPath": "github.com/go-gl/glfw/v3.2/glfw",
+			"Rev": "82775019c87191e4eebfb7d046d44e71a58ea21d"
+		},
+		{
+			"ImportPath": "github.com/juju/errors",
+			"Rev": "4567a5e69fd3130ca0d89f69478e7ac025b67452"
+		},
+		{
+			"ImportPath": "github.com/op/go-logging",
+			"Comment": "v1-7-g970db52",
+			"Rev": "970db520ece77730c7e4724c61121037378659d9"
+		},
+		{
+			"ImportPath": "github.com/pixiv/go-libjpeg/example/decoder",
+			"Comment": "v0.1-49-g511e95d",
+			"Rev": "511e95d51610f96479307fcf5f662068f33662d9"
+		},
+		{
+			"ImportPath": "github.com/pixiv/go-libjpeg/jpeg",
+			"Comment": "v0.1-49-g511e95d",
+			"Rev": "511e95d51610f96479307fcf5f662068f33662d9"
+		},
+		{
+			"ImportPath": "github.com/pixiv/go-libjpeg/rgb",
+			"Comment": "v0.1-49-g511e95d",
+			"Rev": "511e95d51610f96479307fcf5f662068f33662d9"
+		},
+		{
+			"ImportPath": "github.com/pixiv/go-libjpeg/test/util",
+			"Comment": "v0.1-49-g511e95d",
+			"Rev": "511e95d51610f96479307fcf5f662068f33662d9"
+		}
+	]
+}
