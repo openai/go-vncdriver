@@ -34,6 +34,11 @@ static int PyArg_ParseTuple_name(PyObject *args, PyObject *kwds, char **name) {
     return PyArg_ParseTupleAndKeywords(args, kwds, "s", kwlist, name);
 }
 
+static int PyArg_ParseTuple_render(PyObject *args, PyObject *kwds, char **name, int *close) {
+    static char *kwlist[] = {"name", "close", NULL};
+    return PyArg_ParseTupleAndKeywords(args, kwds, "s|i", kwlist, name, close);
+}
+
 static int PyArg_ParseTuple_update(PyObject *args, PyObject *kwds, char **name, PyObject **subscription) {
     static char *kwlist[] = {"name", "subscription", NULL};
     return PyArg_ParseTupleAndKeywords(args, kwds, "sO", kwlist, name, subscription);
@@ -66,8 +71,8 @@ import (
 
 	"github.com/juju/errors"
 	"github.com/op/go-logging"
-	"github.com/openai/gym-vnc/go-vncdriver/gymvnc"
-	"github.com/openai/gym-vnc/go-vncdriver/vncclient"
+	"github.com/openai/go-vncdriver/gymvnc"
+	"github.com/openai/go-vncdriver/vncclient"
 )
 
 var (
@@ -81,26 +86,23 @@ var (
 	vncUpdatesRectangles *C.PyObject = nil
 	vncUpdatesBytes      *C.PyObject = nil
 
-	setup bool = false
+	setup sync.Once
 )
 
 func setupOnce() {
-	if setup {
-		return
-	}
-	setup = true
-
 	// Must hold the GIL when we init these. Thus don't need
 	// Go-level locking as well.
 	vncUpdatesN = C.PyUnicode_FromString(C.CString("stats.vnc.updates.n"))
 	vncUpdatesPixels = C.PyUnicode_FromString(C.CString("stats.vnc.updates.pixels"))
 	vncUpdatesRectangles = C.PyUnicode_FromString(C.CString("stats.vnc.updates.rectangles"))
 	vncUpdatesBytes = C.PyUnicode_FromString(C.CString("stats.vnc.updates.bytes"))
+
+	gymvnc.ConfigureLogging()
 }
 
 //export GoVNCDriver_VNCSession_c_init
 func GoVNCDriver_VNCSession_c_init(self *C.go_vncdriver_VNCSession_object) C.int {
-	setupOnce()
+	setup.Do(setupOnce)
 
 	batch := gymvnc.NewVNCBatch()
 	info := sessionInfo{
@@ -370,10 +372,12 @@ func GoVNCDriver_VNCSession_render(self, args, kwds *C.PyObject) *C.PyObject {
 
 	// parse name argument
 	nameC := new(*C.char)
-	if C.PyArg_ParseTuple_name(args, kwds, nameC) == 0 {
+	closeC := new(C.int)
+	if C.PyArg_ParseTuple_render(args, kwds, nameC, closeC) == 0 {
 		return nil
 	}
 	name := C.GoString(*nameC)
+	close := *closeC != C.int(0)
 
 	ptr := uintptr(unsafe.Pointer(self))
 	info, ok := batchMgr[ptr]
@@ -382,7 +386,7 @@ func GoVNCDriver_VNCSession_render(self, args, kwds *C.PyObject) *C.PyObject {
 		return nil
 	}
 
-	err := info.batch.Render(name)
+	err := info.batch.Render(name, close)
 	if err != nil {
 		// reportBestError(info.batch, err)
 		setError(errors.ErrorStack(err))
@@ -656,14 +660,6 @@ func GoVNCDriver_VNCSession_c_dealloc(self *C.go_vncdriver_VNCSession_object) {
 
 	// We do not own references to screenPyDict / infoPyDict / errPyDict
 	delete(batchMgr, ptr)
-}
-
-//export GoVNCDriver_setup
-func GoVNCDriver_setup(self, args *C.PyObject) *C.PyObject {
-	gymvnc.ConfigureLogging()
-	// Expansion of Py_None
-	C.go_vncdriver_incref(Py_None)
-	return Py_None
 }
 
 func setError(str string) {

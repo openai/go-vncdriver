@@ -14,8 +14,8 @@ import (
 	"github.com/google/gxui"
 	"github.com/google/gxui/drivers/gl"
 	"github.com/google/gxui/samples/flags"
-	"github.com/openai/gym-vnc/go-vncdriver/gymvnc"
-	"github.com/openai/gym-vnc/go-vncdriver/vncclient"
+	"github.com/openai/go-vncdriver/gymvnc"
+	"github.com/openai/go-vncdriver/vncclient"
 	"github.com/pixiv/go-libjpeg/rgb"
 )
 

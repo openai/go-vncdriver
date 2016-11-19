@@ -26,7 +26,7 @@ sudo apt-get install libx11-dev libxcursor-dev libxrandr-dev \
 If you get an error like the following...
 ```
 VNCSession has no renderer. This likely means your go_vncdriver was installed without the OpenGL viewer. See
-https://github.com/openai/universe/tree/master/go-vncdriver for instructions on how to install with the OpenGL viewer.
+https://github.com/openai/go-vncdriver for instructions on how to install with the OpenGL viewer.
 ```
 ... then the first
 thing to try is to reinstall `go-vncdriver` from PyPI. Manually `rm` both `go_vncdriver/` and `go_vncdriver-0.3.2.dist-info/` from your

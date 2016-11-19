@@ -1,6 +1,6 @@
 package gymvnc
 
-import "github.com/openai/gym-vnc/go-vncdriver/vncclient"
+import "github.com/openai/go-vncdriver/vncclient"
 
 type Screen struct {
 	Data   []vncclient.Color

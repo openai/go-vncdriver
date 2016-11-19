@@ -12,7 +12,7 @@ import (
 	"os"
 
 	"github.com/cheggaaa/pb"
-	"github.com/openai/gym-vnc/go-vncdriver/vncclient"
+	"github.com/openai/go-vncdriver/vncclient"
 )
 
 var (

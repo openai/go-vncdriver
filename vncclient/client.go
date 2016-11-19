@@ -14,7 +14,7 @@ import (
 	"unicode"
 
 	"github.com/juju/errors"
-	"github.com/openai/gym-vnc/go-vncdriver/flexzlib"
+	"github.com/openai/go-vncdriver/flexzlib"
 )
 
 type ClientConn struct {

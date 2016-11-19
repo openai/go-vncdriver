@@ -6,7 +6,7 @@ import (
 	"runtime/pprof"
 	"time"
 
-	"github.com/openai/universe/go-vncdriver/gymvnc"
+	"github.com/openai/go-vncdriver/gymvnc"
 )
 import _ "net/http/pprof"
 

@@ -12,7 +12,7 @@ import (
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/juju/errors"
 	"github.com/op/go-logging"
-	"github.com/openai/gym-vnc/go-vncdriver/vncclient"
+	"github.com/openai/go-vncdriver/vncclient"
 )
 
 var once sync.Once
@@ -85,8 +85,8 @@ func (g *VNCGL) Close() error {
 		gl.DeleteTextures(1, &g.rootTexture)
 	}
 
-	// TODO: only call this when destroying the last instance
 	glfw.Terminate()
+	once = sync.Once{}
 	return nil
 }
 

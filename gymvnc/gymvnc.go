@@ -8,7 +8,7 @@ import (
 
 	"github.com/juju/errors"
 	"github.com/op/go-logging"
-	"github.com/openai/gym-vnc/go-vncdriver/vncclient"
+	"github.com/openai/go-vncdriver/vncclient"
 )
 
 var (
@@ -222,9 +222,9 @@ func (c *VNCSession) SetRenderer(renderer Renderer) error {
 }
 
 // Must call from main thread
-func (c *VNCSession) Render() error {
+func (c *VNCSession) Render(close bool) error {
 	if c.renderer == nil {
-		return errors.Errorf("[%s] VNCSession has no renderer. This likely means your go_vncdriver was installed without the OpenGL viewer. See https://github.com/openai/gym-vnc/tree/master/go-vncdriver for instructions on how to install with the OpenGL viewer.", c.label)
+		return errors.Errorf("[%s] VNCSession has no renderer. This likely means your go_vncdriver was installed without the OpenGL viewer. See https://github.com/openai/tree/master/go-vncdriver for instructions on how to install with the OpenGL viewer.", c.label)
 	}
 
 	c.lock.Lock()
@@ -247,7 +247,11 @@ func (c *VNCSession) Render() error {
 		c.rendererActive = true
 	}
 
-	c.renderer.Render()
+	if close {
+		c.renderer.Close()
+	} else {
+		c.renderer.Render()
+	}
 	return nil
 }
 
@@ -645,9 +649,9 @@ func (v *VNCBatch) SetRenderer(name string, renderer Renderer) error {
 	}
 }
 
-func (v *VNCBatch) Render(name string) error {
+func (v *VNCBatch) Render(name string, close bool) error {
 	if session, ok := v.sessions[name]; ok {
-		return session.Render()
+		return session.Render(close)
 	} else {
 		return errors.Errorf("no such session: %s", name)
 	}

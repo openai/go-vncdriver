@@ -8,7 +8,7 @@ import (
 	"io"
 
 	"github.com/op/go-logging"
-	"github.com/openai/gym-vnc/go-vncdriver/flexflate"
+	"github.com/openai/go-vncdriver/flexflate"
 )
 
 var log = logging.MustGetLogger("flexzlib")

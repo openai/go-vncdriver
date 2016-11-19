@@ -10,8 +10,8 @@ cd "$(dirname "$0")"
 rm -rf .build
 #trap 'rm -rf .build' EXIT
 
-mkdir -p .build/src/github.com/openai/universe
-ln -s ../../../../.. .build/src/github.com/openai/universe/go-vncdriver
+mkdir -p .build/src/github.com/openai
+ln -s ../../../.. .build/src/github.com/openai/go-vncdriver
 ln -s ../../../vendor/github.com/go-gl .build/src/github.com
 ln -s ../../../vendor/github.com/op .build/src/github.com
 ln -s ../../../vendor/github.com/juju .build/src/github.com
@@ -60,7 +60,7 @@ if [ -z "$CGO_LDFLAGS" ]; then
     exit 1
 fi
 
-cd "$(pwd)/.build/src/github.com/openai/universe/go-vncdriver"
+cd "$(pwd)/.build/src/github.com/openai/go-vncdriver"
 
 build_no_gl() {
     echo >&2 "Building without OpenGL: go build -tags no_gl -buildmode=c-shared -o go_vncdriver.so"
@@ -91,7 +91,7 @@ else
     echo >&2 "Running build with OpenGL rendering."
     if ! build_gl; then
 	echo >&2
-	echo >&2 "Note: could not build with OpenGL rendering (cf https://github.com/openai/universe/blob/master/go-vncdriver/README.md). This is expected on most servers. Going to try building without OpenGL."
+	echo >&2 "Note: could not build with OpenGL rendering (cf https://github.com/openai/blob/master/go-vncdriver/README.md). This is expected on most servers. Going to try building without OpenGL."
 
 	build_no_gl
     fi

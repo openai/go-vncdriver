@@ -33,7 +33,7 @@ You can obtain a recent Go build from https://golang.org/doc/install. If on Ubun
             if 'buildmode' not in str(build_help):
                 raise RuntimeError("""
 
-Your Go installation looks too old: go_vncdriver requires at least Go 1.5. Fortunately, go_vncdriver is an optional (though significant) performance enhancement, and you can still use gym-vnc without it.
+Your Go installation looks too old: go_vncdriver requires at least Go 1.5.
 
 You can obtain a recent Go build from https://golang.org/doc/install. If on Ubuntu, you can follow: https://github.com/golang/go/wiki/Ubuntu.
 

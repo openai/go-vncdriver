@@ -137,7 +137,6 @@ PyObject *get_go_vncdriver_VNCSession_type() {
 }
 
 static PyMethodDef go_vncdriver_module_methods[] = {
-    {"setup", GoVNCDriver_setup, METH_NOARGS, "Configure logging."},
     {NULL, NULL, 0, NULL}
 };
 
@@ -223,8 +222,6 @@ initgo_vncdriver(void)
 
     Py_INCREF(&go_vncdriver_VNCSession_type);
     PyModule_AddObject(module, "VNCSession", (PyObject *) &go_vncdriver_VNCSession_type);
-
-    GoVNCDriver_setup(NULL, NULL);
 
     // TODO: need to py3 this?
     import_array();
