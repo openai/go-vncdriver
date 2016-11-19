@@ -16,9 +16,8 @@ import (
 )
 
 var (
-	log       = logging.MustGetLogger("vncgl")
-	renderers int
-	glfwState sync.Mutex
+	log   = logging.MustGetLogger("vncgl")
+	setup sync.Once
 )
 
 func colorsToImage(x, y, width, height uint16, colors []vncclient.Color) *image.RGBA {
@@ -35,6 +34,18 @@ func colorsToImage(x, y, width, height uint16, colors []vncclient.Color) *image.
 	return rgba
 }
 
+func SetupRendering() {
+	setup.Do(func() {
+		if err := glfw.Init(); err != nil {
+			log.Fatalf("failed to initialize glfw: %v", err)
+		}
+
+		glfw.WindowHint(glfw.Resizable, glfw.False)
+		glfw.WindowHint(glfw.ContextVersionMajor, 2)
+		glfw.WindowHint(glfw.ContextVersionMinor, 1)
+	})
+}
+
 // Only interact with this from the main thread
 type VNCGL struct {
 	rootTexture               uint32
@@ -44,20 +55,6 @@ type VNCGL struct {
 }
 
 func (v *VNCGL) Init(width, height uint16, name string, screen []vncclient.Color) error {
-	glfwState.Lock()
-	defer glfwState.Unlock()
-
-	if renderers == 0 {
-		if err := glfw.Init(); err != nil {
-			log.Fatalf("failed to initialize glfw: %v", err)
-		}
-
-		glfw.WindowHint(glfw.Resizable, glfw.False)
-		glfw.WindowHint(glfw.ContextVersionMajor, 2)
-		glfw.WindowHint(glfw.ContextVersionMinor, 1)
-	}
-	renderers++
-
 	window, err := glfw.CreateWindow(int(width), int(height), name, nil, nil)
 	if err != nil {
 		return errors.Annotate(err, "couldn't create window")
@@ -90,13 +87,6 @@ func (g *VNCGL) Close() error {
 	g.window.Destroy()
 	if g.rootTexture != 0 {
 		gl.DeleteTextures(1, &g.rootTexture)
-	}
-
-	glfwState.Lock()
-	defer glfwState.Unlock()
-	renderers--
-	if renderers == 0 {
-		glfw.Terminate()
 	}
 	return nil
 }

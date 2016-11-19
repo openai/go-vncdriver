@@ -202,7 +202,6 @@ func GoVNCDriver_VNCSession_connect(self, args, kwds *C.PyObject) *C.PyObject {
 		return nil
 	}
 	info.open(name)
-	info.initRenderer(name)
 
 	// errCh := make(chan error, 10)
 	// done := make(chan bool)
@@ -385,6 +384,8 @@ func GoVNCDriver_VNCSession_render(self, args, kwds *C.PyObject) *C.PyObject {
 		setError(errors.ErrorStack(errors.New("VNCSession is already closed")))
 		return nil
 	}
+
+	info.initRenderer(name)
 
 	err := info.batch.Render(name, close)
 	if err != nil {
@@ -678,6 +679,8 @@ type sessionInfo struct {
 
 	screenInfoErrPytuple *C.PyObject
 	screenNumpy          map[string]map[*gymvnc.Screen]*C.PyObject
+
+	rendererSet bool
 }
 
 func (b *sessionInfo) open(name string) {
