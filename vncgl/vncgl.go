@@ -15,8 +15,11 @@ import (
 	"github.com/openai/go-vncdriver/vncclient"
 )
 
-var once sync.Once
-var log = logging.MustGetLogger("vncgl")
+var (
+	log       = logging.MustGetLogger("vncgl")
+	renderers int
+	glfwState sync.Mutex
+)
 
 func colorsToImage(x, y, width, height uint16, colors []vncclient.Color) *image.RGBA {
 	imgRect := image.Rect(int(x), int(y), int(x+width), int(y+height))
@@ -41,7 +44,10 @@ type VNCGL struct {
 }
 
 func (v *VNCGL) Init(width, height uint16, name string, screen []vncclient.Color) error {
-	once.Do(func() {
+	glfwState.Lock()
+	defer glfwState.Unlock()
+
+	if renderers == 0 {
 		if err := glfw.Init(); err != nil {
 			log.Fatalf("failed to initialize glfw: %v", err)
 		}
@@ -49,7 +55,8 @@ func (v *VNCGL) Init(width, height uint16, name string, screen []vncclient.Color
 		glfw.WindowHint(glfw.Resizable, glfw.False)
 		glfw.WindowHint(glfw.ContextVersionMajor, 2)
 		glfw.WindowHint(glfw.ContextVersionMinor, 1)
-	})
+	}
+	renderers++
 
 	window, err := glfw.CreateWindow(int(width), int(height), name, nil, nil)
 	if err != nil {
@@ -85,8 +92,12 @@ func (g *VNCGL) Close() error {
 		gl.DeleteTextures(1, &g.rootTexture)
 	}
 
-	glfw.Terminate()
-	once = sync.Once{}
+	glfwState.Lock()
+	defer glfwState.Unlock()
+	renderers--
+	if renderers == 0 {
+		glfw.Terminate()
+	}
 	return nil
 }
 
