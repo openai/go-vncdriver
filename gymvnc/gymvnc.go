@@ -241,7 +241,7 @@ func (c *VNCSession) Render(close bool) error {
 	}
 
 	if !c.rendererActive {
-		if err := c.renderer.Init(c.conn.FramebufferWidth, c.conn.FramebufferHeight, c.conn.DesktopName, c.frontScreen.Data); err != nil {
+		if err := c.renderer.Init(c.conn.FramebufferWidth, c.conn.FramebufferHeight, "go-vncdriver: "+c.conn.DesktopName, c.frontScreen.Data); err != nil {
 			return errors.Annotate(err, "could not render")
 		}
 		c.rendererActive = true
