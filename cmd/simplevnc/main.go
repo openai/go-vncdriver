@@ -43,7 +43,7 @@ func main() {
 		elapsed := time.Now().Sub(start)
 		if elapsed >= time.Duration(1)*time.Second {
 			delta := float64(elapsed / time.Second)
-			log.Printf("Recevied: updates=%.2f errs=%.2f", float64(updates)/delta, float64(errs)/delta)
+			log.Printf("Received: updates=%.2f errs=%.2f", float64(updates)/delta, float64(errs)/delta)
 
 			start = time.Now()
 			updates = 0
