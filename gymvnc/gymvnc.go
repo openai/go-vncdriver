@@ -130,7 +130,7 @@ func NewVNCSession(name string, c VNCSessionConfig) *VNCSession {
 		config:             c,
 
 		id:    id,
-		label: fmt.Sprintf("%d:%s:%s", id, name, c.Address),
+		label: fmt.Sprintf("%s:%s", name, c.Address),
 	}
 	id++
 	session.start()
