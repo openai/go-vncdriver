@@ -584,6 +584,7 @@ func (c *VNCSession) connect(updates chan *vncclient.FramebufferUpdateMessage) e
 			}
 		case <-c.mgr.Done:
 			log.Debugf("[%s] server message goroutine exiting", c.label)
+			return
 		}
 	}
 }
