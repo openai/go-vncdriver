@@ -52,7 +52,7 @@ You can obtain a recent Go build from https://golang.org/doc/install. If on Ubun
         DistutilsBuild.run(self)
 
 setup(name='go_vncdriver',
-      version='0.4.7',
+      version='0.4.8',
       cmdclass={'build': Build},
       packages=['go_vncdriver'],
       package_dir={'go_vncdriver': '.'},
