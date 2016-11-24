@@ -201,6 +201,41 @@ func (c *ClientConn) FramebufferUpdateRequest(incremental bool, x, y, width, hei
 	return nil
 }
 
+// FramebufferUpdateRequest requests a framebuffer update from the server.
+// There may be an indefinite time between the request and the actual
+// framebuffer update being received.
+//
+// See RFC 6143 Section 7.5.3
+func (c *ClientConn) EnableContinuousUpdates(incremental bool, x, y, width, height uint16) error {
+	c.send.Lock()
+	defer c.send.Unlock()
+
+	var buf bytes.Buffer
+	var incrementalByte uint8
+
+	if incremental {
+		incrementalByte = 1
+	}
+
+	data := []interface{}{
+		uint8(150),
+		incrementalByte,
+		x, y, width, height,
+	}
+
+	for _, val := range data {
+		if err := binary.Write(&buf, binary.BigEndian, val); err != nil {
+			return err
+		}
+	}
+
+	if _, err := c.c.Write(buf.Bytes()[0:10]); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // KeyEvent indiciates a key press or release and sends it to the server.
 // The key is indicated using the X Window System "keysym" value. Use
 // Google to find a reference of these values. To simulate a key press,
@@ -275,6 +310,7 @@ func (c *ClientConn) SetEncodings(encs []Encoding) error {
 	data[2] = uint16(len(encs))
 
 	for i, enc := range encs {
+		fmt.Printf("Writing: %v %s\n", enc, enc.Type())
 		data[3+i] = int32(enc.Type())
 	}
 
@@ -551,6 +587,8 @@ func (c *ClientConn) mainLoop() {
 		}
 	}
 
+	c.EnableContinuousUpdates(true, 0, 0, c.FramebufferWidth, c.FramebufferHeight)
+
 	for {
 		var messageType uint8
 		if err := binary.Read(c.c, binary.BigEndian, &messageType); err != nil {
@@ -564,8 +602,6 @@ func (c *ClientConn) mainLoop() {
 			c.reportError(errors.Errorf("no such message type: %d", messageType))
 			break
 		}
-
-		c.FramebufferUpdateRequest(true, 0, 0, c.FramebufferWidth, c.FramebufferHeight)
 
 		parsedMsg, err := msg.Read(c, c.c)
 		if err != nil {

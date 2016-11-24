@@ -28,6 +28,38 @@ type Encoding interface {
 	Size() int
 }
 
+// continuous updates
+
+type EncodingContinuousUpdates struct{}
+
+func (f EncodingContinuousUpdates) Size() int {
+	return 0
+}
+
+func (f EncodingContinuousUpdates) Type() int32 {
+	return -313
+}
+
+func (f EncodingContinuousUpdates) Read(c *ClientConn, rect *Rectangle, r io.Reader) (Encoding, error) {
+	return f, errors.NotImplementedf("EncodingContinuousUpdates is a pseudo-encoding")
+}
+
+type EncodingFence struct{}
+
+func (f EncodingFence) Size() int {
+	return 0
+}
+
+func (f EncodingFence) Type() int32 {
+	return -312
+}
+
+func (f EncodingFence) Read(c *ClientConn, rect *Rectangle, r io.Reader) (Encoding, error) {
+	return f, errors.NotImplementedf("EncodingFence is a pseudo-encoding")
+}
+
+// quality levels
+
 type QualityLevel uint32
 
 func (f QualityLevel) Size() int {
