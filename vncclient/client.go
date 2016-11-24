@@ -565,6 +565,8 @@ func (c *ClientConn) mainLoop() {
 			break
 		}
 
+		c.FramebufferUpdateRequest(true, 0, 0, c.FramebufferWidth, c.FramebufferHeight)
+
 		parsedMsg, err := msg.Read(c, c.c)
 		if err != nil {
 			c.reportError(err)
