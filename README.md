@@ -3,7 +3,30 @@
 A Go implementation of the Gym VNCDriver Python interface. Should be
 fast.
 
-## Installation
+## OpenGL viewer
+
+If you get an error of the form:
+
+```VNCSession has no renderer. This likely means your go_vncdriver was installed without the OpenGL viewer. See https://github.com/openai/go-vncdriver for details on how debug```
+
+That means that your `go-vncdriver` was built without OpenGL
+support. (The installer will first try to install with OpenGL, but
+will fall back to installing without it.)
+
+To figure out what happened, the easiest approach is to clone this
+window and run `./build.sh`, which should print out the error upon
+installing with OpenGL:
+
+```
+git clone git@github.com:openai/go-vncdriver
+cd go-vncdriver
+./build.sh
+```
+
+Once you've fixed the issue, you should reinstall `go-vncdriver` via
+`pip install --ignore-installed go-vncdriver`.
+
+## installation
 
 By default, `go_vncdriver` will try to include OpenGL rendering. If
 that build fails, it will fall back to omitting OpenGL rendering. (You
@@ -22,15 +45,6 @@ sudo apt-get install libx11-dev libxcursor-dev libxrandr-dev \
   libxinerama-dev libxi-dev libxxf86vm-dev libgl1-mesa-dev \
   mesa-common-dev
 ```
-
-If you get an error like the following...
-```
-VNCSession has no renderer. This likely means your go_vncdriver was installed without the OpenGL viewer. See
-https://github.com/openai/go-vncdriver for instructions on how to install with the OpenGL viewer.
-```
-... then the first
-thing to try is to reinstall `go-vncdriver` from PyPI. Manually `rm` both `go_vncdriver/` and `go_vncdriver-0.3.2.dist-info/` from your
-`site-packages` directory, and then redo `pip install go-vncdriver`. You can find your `site-packages` directory by running something like `python -c "import go_vncdriver; print(go_vncdriver.__file__)"`
 
 ## Python versions
 
