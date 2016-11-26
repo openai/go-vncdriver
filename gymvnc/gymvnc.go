@@ -224,7 +224,7 @@ func (c *VNCSession) SetRenderer(renderer Renderer) error {
 // Must call from main thread
 func (c *VNCSession) Render(close bool) error {
 	if c.renderer == nil {
-		return errors.Errorf("[%s] VNCSession has no renderer. This likely means your go_vncdriver was installed without the OpenGL viewer. See https://github.com/openai/tree/master/go-vncdriver for instructions on how to install with the OpenGL viewer.", c.label)
+		return errors.Errorf("[%s] VNCSession has no renderer. This likely means your go_vncdriver was installed without the OpenGL viewer. See https://github.com/openai/go-vncdriver for details on how debug.", c.label)
 	}
 
 	c.lock.Lock()

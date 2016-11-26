@@ -94,7 +94,7 @@ else
     echo >&2 "Running build with OpenGL rendering."
     if ! build_gl; then
 	echo >&2
-	echo >&2 "Note: could not build with OpenGL rendering (cf https://github.com/openai/blob/master/go-vncdriver/README.md). This is expected on most servers. Going to try building without OpenGL."
+	echo >&2 "Note: could not build with OpenGL rendering (cf https://github.com/openai/go-vncdriver). This is expected on most servers. Going to try building without OpenGL."
 
 	build_no_gl
     fi
