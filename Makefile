@@ -4,7 +4,7 @@ build:
 	./build.sh
 
 no_gl:
-	./build.sh no_gl
+	GO_VNCDRIVER_NOGL=true ./build.sh
 
 install:
 	pip install -r requirements.txt

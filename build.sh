@@ -2,9 +2,12 @@
 
 # Builds against your current Python version. You must have numpy installed.
 
-set -e
+set -eu
 
 cd "$(dirname "$0")"
+
+# Allow setup.py to override which python gets used
+PYTHON=${GO_VNCDRIVER_PYTHON:-python}
 
 # Clear .build
 rm -rf .build
@@ -40,7 +43,7 @@ fi
 
 export GOPATH="$(pwd)/.build"
 export CGO_CFLAGS="$(
-    python -c "import numpy, sysconfig
+    ${PYTHON} -c "import numpy, sysconfig
 print('-I{} -I{}\n'.format(numpy.get_include(), sysconfig.get_config_var('INCLUDEPY')))"
 )"
 if [ -z "$CGO_CFLAGS" ]; then
@@ -48,7 +51,7 @@ if [ -z "$CGO_CFLAGS" ]; then
     exit 1
 fi
 
-export CGO_LDFLAGS="${LIBJPG} $(python -c "import re, sysconfig;
+export CGO_LDFLAGS="${LIBJPG} $(${PYTHON} -c "import re, sysconfig;
 library = sysconfig.get_config_var('LIBRARY')
 match = re.search('^lib(.*)\.a', library)
 if match is None:
@@ -85,7 +88,7 @@ echo >&2
 echo >&2 "export CGO_LDFLAGS='${CGO_LDFLAGS}'"
 echo >&2 "export CGO_CFLAGS='${CGO_CFLAGS}'"
 echo >&2
-if [ "$1" = "no_gl" ] || ! [ -z "${GO_VNCDRIVER_NOGL:-}" ]; then
+if ! [ -z "${GO_VNCDRIVER_NOGL:-}" ]; then
     build_no_gl
 else
     echo >&2 "Running build with OpenGL rendering."

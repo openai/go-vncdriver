@@ -41,6 +41,7 @@ You can obtain a recent Go build from https://golang.org/doc/install. If on Ubun
 """)
 
     def build(self):
+        os.environ['GO_VNCDRIVER_PYTHON'] = sys.executable
         cmd = ['make', 'build']
         try:
             subprocess.check_call(cmd, cwd=here())
@@ -52,7 +53,7 @@ You can obtain a recent Go build from https://golang.org/doc/install. If on Ubun
         DistutilsBuild.run(self)
 
 setup(name='go_vncdriver',
-      version='0.4.8',
+      version='0.4.9',
       cmdclass={'build': Build},
       packages=['go_vncdriver'],
       package_dir={'go_vncdriver': '.'},
