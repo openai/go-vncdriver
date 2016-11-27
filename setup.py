@@ -26,14 +26,24 @@ class Build(DistutilsBuild):
 
 Unable to execute '{}'. HINT: are you sure `go` is installed?
 
-You can obtain a recent Go build from https://golang.org/doc/install. If on Ubuntu, you can follow: https://github.com/golang/go/wiki/Ubuntu. go_vncdriver requires at least Go 1.5.
+go_vncdriver requires Go version 1.5 or newer. Here are some hints for Go installation:
+
+- Ubuntu 14.04: The default golang is too old, but you can get a modern one via: "sudo add-apt-repository ppa:ubuntu-lxc/lxd-stable && sudo apt-get update && sudo apt-get install golang"
+- Ubuntu 16:04: "sudo apt-get install golang"
+- OSX, El Capitan or newer: "brew install golang"
+- Other: you can obtain a recent Go build from https://golang.org/doc/install
 
 (DETAIL: original error: {}.)""".format(' '.join(cmd), e))
         else:
             if 'buildmode' not in str(build_help):
                 raise RuntimeError("""
 
-Your Go installation looks too old: go_vncdriver requires at least Go 1.5.
+Your Go installation looks too old: go_vncdriver requires Go version 1.5 or newer. Here are some hints for Go installation:
+
+- Ubuntu 14.04: The default golang is too old, but you can get a modern one via: "sudo add-apt-repository ppa:ubuntu-lxc/lxd-stable && sudo apt-get update && sudo apt-get install golang"
+- Ubuntu 16:04: "sudo apt-get install golang"
+- OSX, El Capitan or newer: "brew install golang"
+- Other: you can obtain a recent Go build from https://golang.org/doc/install
 
 You can obtain a recent Go build from https://golang.org/doc/install. If on Ubuntu, you can follow: https://github.com/golang/go/wiki/Ubuntu.
 
