@@ -34,10 +34,20 @@ probably don't care about OpenGL rendering on a server anyway.)
 
 ### Dependencies
 
-Make sure you have your Python development headers. On Ubuntu, this is
-`sudo apt-get install python-dev`.
+To install on Ubuntu 16.04, you need to have the following packages
+installed:
 
-If you want to allow OpenGL rendering, installed your X and OpenGL
+```
+sudo apt-get install -y python-dev make golang libjpeg-turbo8-dev
+```
+
+On OSX, the following should suffice:
+
+```
+brew install golang libjpeg-turbo
+```
+
+If you'd also like to enable OpenGL, you'll need X and OpenGL
 development headers. On Ubuntu, this is:
 
 ```
@@ -48,5 +58,4 @@ sudo apt-get install libx11-dev libxcursor-dev libxrandr-dev \
 
 ## Python versions
 
-`go_vncdriver` currently supports only Python 2.7, but adding Python
-3.x compatibility will be easy.
+`go_vncdriver` has been tested on Python 2.7 and 3.5.
