@@ -22,19 +22,23 @@ ln -s ../../../vendor/github.com/pixiv .build/src/github.com
 
 # We need to prevent from linking against Anaconda Python's libpjpeg.
 #
-# Right now we hardcode these paths, and could fall back to actually
-# looking it up. But this might mean not getting libjpeg-turbo, which
-# is quite nice to have.
-#
-# Could do the lookup with:
-#
-# ld -ljpeg --trace-symbol jpeg_CreateDecompress -e 0
+# Right now we hardcode these paths, and fall back to actually looking
+# it up.
 for i in /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/local/opt/jpeg-turbo/lib/libjpeg.dylib; do
     if [ -e "$i" ]; then
 	LIBJPG="$i"
 	break
     fi
 done
+
+# Note this might mean not getting libjpeg-turbo, which is quite nice
+# to have.
+if [ -z "${LIBJPG:-}" ]; then
+    OUTPUT=$(ld -ljpeg --trace-symbol jpeg_CreateDecompress -e 0 2>&1) || OUTPUT=
+    if ! [ -z "${OUTPUT}" ]; then
+	LIBJPG=$(echo "$OUTPUT" | cut -f 1 -d :)
+    fi
+fi
 
 if [ -z "${LIBJPG:-}" ]; then
     echo >&2 "Could not find libjpeg. HINT: try 'sudo apt-get install libjpeg-turbo8-dev' on Ubuntu or 'brew install libjpeg-turbo' on OSX"
