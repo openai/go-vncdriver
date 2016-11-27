@@ -1,7 +1,6 @@
 # go-vncdriver
 
-A Go implementation of the Gym VNCDriver Python interface. Should be
-fast.
+A fast VNC driver.
 
 ## OpenGL viewer
 
