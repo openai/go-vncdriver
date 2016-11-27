@@ -43,11 +43,18 @@ sudo apt-get install -y python-dev make golang libjpeg-turbo8-dev
 On OSX, the following should suffice:
 
 ```
-brew install golang libjpeg-turbo
+brew install libjpeg-turbo golang
 ```
 
-If you'd also like to enable OpenGL, you'll need X and OpenGL
-development headers. On Ubuntu, this is:
+(On OSX newer than El Capitan, you may need to
+[install golang](https://golang.org/doc/install) from their site, and
+then just install `brew install libjpeg-turbo`.)
+
+#### Rendering
+
+The best way to see what your agent sees is to enable OpenGL
+rendering. You'll need X and OpenGL development headers. On Ubuntu,
+this is:
 
 ```
 sudo apt-get install libx11-dev libxcursor-dev libxrandr-dev \
