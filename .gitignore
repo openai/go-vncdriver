@@ -1,5 +1,5 @@
 *.so
-*.h
+go_vncdriver.h
 *.dSYM
 /build
 /dist
