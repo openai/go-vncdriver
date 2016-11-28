@@ -22,6 +22,14 @@ cd go-vncdriver
 ./build.sh
 ```
 
+if you get some issue like below then you can go ahead [Dependencies](https://github.com/baoblackcoal/go-vncdriver#dependencies):
+```
+fatal error: X11/Xcursor/Xcursor.h: No such file or directory
+fatal error: X11/extensions/Xrandr.h: No such file or directory
+fatal error: X11/extensions/XInput.h: No such file or directory
+fatal error: GL/gl.h: No such file or directory
+```
+
 Once you've fixed the issue, you should reinstall `go-vncdriver` via
 `pip install --ignore-installed go-vncdriver`.
 
