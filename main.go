@@ -65,6 +65,9 @@ static void go_vncdriver_incref(PyObject *obj) {
 import "C"
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"strconv"
 	"sync"
 	"time"
 	"unsafe"
@@ -88,6 +91,17 @@ var (
 
 	setup sync.Once
 )
+
+func init() {
+	if os.Getenv("DEBUG_GO_VNCDRIVER_SO") != "" {
+		out, err := exec.Command("lsof", "-p", strconv.Itoa(os.Getpid())).CombinedOutput()
+		if err == nil {
+			fmt.Printf("%s\n", out)
+		} else {
+			fmt.Println("Error calling lsof: %v", err)
+		}
+	}
+}
 
 func setupOnce() {
 	// Must hold the GIL when we init these. Thus don't need
