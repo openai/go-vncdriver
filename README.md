@@ -17,7 +17,7 @@ window and run `./build.sh`, which should print out the error upon
 installing with OpenGL:
 
 ```
-git clone git@github.com:openai/go-vncdriver
+git clone https://github.com/openai/go-vncdriver.git
 cd go-vncdriver
 ./build.sh
 ```
