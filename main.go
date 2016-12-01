@@ -148,7 +148,7 @@ func GoVNCDriver_VNCSession_connect(self, args, kwds *C.PyObject) *C.PyObject {
 	ptr := uintptr(unsafe.Pointer(self))
 	info, ok := batchMgr[ptr]
 	if !ok {
-		setError(errors.ErrorStack(errors.New("VNCSession is already closed")))
+		setError(errors.New("VNCSession is already closed"))
 		return nil
 	}
 
@@ -212,7 +212,7 @@ func GoVNCDriver_VNCSession_connect(self, args, kwds *C.PyObject) *C.PyObject {
 		Subscription: subscription,
 	})
 	if err != nil {
-		setError(errors.ErrorStack(err))
+		setError(err)
 		return nil
 	}
 	info.open(name)
@@ -222,7 +222,7 @@ func GoVNCDriver_VNCSession_connect(self, args, kwds *C.PyObject) *C.PyObject {
 	// batch, err := gymvnc.NewVNCSession(, )
 	// if err != nil {
 	// 	close(done)
-	// 	setError(errors.ErrorStack(err))
+	// 	setError(err)
 	// 	return C.int(-1)
 	// }
 
@@ -235,7 +235,7 @@ func GoVNCDriver_VNCSession_step(self, actionDict *C.PyObject) (rep *C.PyObject)
 	// defer func() {
 	// 	if r := recover(); r != nil {
 	// 		stack := debug.Stack()
-	// 		setError(string(stack))
+	// 		setError(stack)
 	// 		rep = nil
 	// 	}
 	// }()
@@ -246,7 +246,7 @@ func GoVNCDriver_VNCSession_step(self, actionDict *C.PyObject) (rep *C.PyObject)
 	ptr := uintptr(unsafe.Pointer(self))
 	info, ok := batchMgr[ptr]
 	if !ok {
-		setError("VNCSession is closed")
+		setError(errors.New("VNCSession is closed"))
 		return nil
 	}
 
@@ -277,7 +277,7 @@ func GoVNCDriver_VNCSession_step(self, actionDict *C.PyObject) (rep *C.PyObject)
 		}
 		if !ok {
 			if C.PyErr_Occurred() == nil {
-				setError(errors.ErrorStack(errors.Errorf("BUG: unpacking actions failed for %s, but no Python error was set", name)))
+				setError(errors.Errorf("BUG: unpacking actions failed for %s, but no Python error was set", name))
 				return nil
 			}
 			return nil
@@ -321,7 +321,7 @@ func GoVNCDriver_VNCSession_update(self, args, kwds *C.PyObject) *C.PyObject {
 	ptr := uintptr(unsafe.Pointer(self))
 	info, ok := batchMgr[ptr]
 	if !ok {
-		setError("VNCSession is closed")
+		setError(errors.New("VNCSession is closed"))
 		return nil
 	}
 
@@ -338,7 +338,7 @@ func GoVNCDriver_VNCSession_update(self, args, kwds *C.PyObject) *C.PyObject {
 
 	err := info.batch.SetSubscription(name, subscription)
 	if err != nil {
-		setError(errors.ErrorStack(err))
+		setError(err)
 		return nil
 	}
 
@@ -383,6 +383,11 @@ func GoVNCDriver_VNCSession_render(self, args, kwds *C.PyObject) *C.PyObject {
 	batchLock.Lock()
 	defer batchLock.Unlock()
 
+	if !compiledWithGL {
+		setError(errors.New("go_vncdriver was installed without OpenGL support. See https://github.com/openai/go-vncdriver for details on how debug."))
+		return nil
+	}
+
 	// parse name argument
 	nameC := new(*C.char)
 	closeC := new(C.int)
@@ -395,16 +400,19 @@ func GoVNCDriver_VNCSession_render(self, args, kwds *C.PyObject) *C.PyObject {
 	ptr := uintptr(unsafe.Pointer(self))
 	info, ok := batchMgr[ptr]
 	if !ok {
-		setError(errors.ErrorStack(errors.New("VNCSession is already closed")))
+		setError(errors.New("VNCSession is already closed"))
 		return nil
 	}
 
-	info.initRenderer(name)
+	if err := info.initRenderer(name); err != nil {
+		setError(err)
+		return nil
+	}
 
 	err := info.batch.Render(name, close)
 	if err != nil {
 		// reportBestError(info.batch, err)
-		setError(errors.ErrorStack(err))
+		setError(err)
 		return nil
 	}
 
@@ -428,17 +436,17 @@ func GoVNCDriver_VNCSession_render(self, args, kwds *C.PyObject) *C.PyObject {
 func GoString_FromPyString(t *C.PyObject) (string, bool) {
 	unicodePystr := C.PyUnicode_FromObject(t)
 	if unicodePystr == nil {
-		setError(errors.ErrorStack(errors.New("could not convert to unicode")))
+		setError(errors.New("could not convert to unicode"))
 		return "", false
 	}
 	bytePystr := C.PyUnicode_AsASCIIString(unicodePystr)
 	if bytePystr == nil {
-		setError(errors.ErrorStack(errors.New("could not encode to ascii")))
+		setError(errors.New("could not encode to ascii"))
 		return "", false
 	}
 	typePystr := C.PyBytes_AsString(bytePystr)
 	if typePystr == nil {
-		setError(errors.ErrorStack(errors.New("could not convert bytes to cstring")))
+		setError(errors.New("could not convert bytes to cstring"))
 		return "", false
 	}
 	return C.GoString(typePystr), true
@@ -492,7 +500,7 @@ func convertEventPy(eventPy *C.PyObject) (event gymvnc.VNCEvent, ok bool) {
 	// eventPy: ("PointerEvent", x, y, buttonmask) or ("KeyEvent", key, down)
 
 	// if PyTuple_Check(eventPy) == 0 {
-	// 	setError("event was not a tuple")
+	// 	setError(errors.New("event was not a tuple"))
 	// 	ok = false
 	// 	return
 	// }
@@ -503,7 +511,7 @@ func convertEventPy(eventPy *C.PyObject) (event gymvnc.VNCEvent, ok bool) {
 		if !isOk {
 			return
 		}
-		setError(fmt.Sprintf("Expected non-empty tuple rather than: %s", repr))
+		setError(errors.Errorf("Expected non-empty tuple rather than: %s", repr))
 		return
 	}
 
@@ -549,7 +557,7 @@ func convertEventPy(eventPy *C.PyObject) (event gymvnc.VNCEvent, ok bool) {
 			Down:   down,
 		}
 	} else {
-		setError(fmt.Sprintf("invalid event type: %s", eventType))
+		setError(errors.Errorf("invalid event type: %s", eventType))
 	}
 
 	ok = true
@@ -634,7 +642,7 @@ func GoVNCDriver_VNCSession_close(self, args, kwds *C.PyObject) *C.PyObject {
 		ptr := uintptr(unsafe.Pointer(self))
 		info, ok := batchMgr[ptr]
 		if !ok {
-			setError(errors.ErrorStack(errors.New("VNCSession is already closed")))
+			setError(errors.New("VNCSession is already closed"))
 			return nil
 		}
 
@@ -677,8 +685,8 @@ func GoVNCDriver_VNCSession_c_dealloc(self *C.go_vncdriver_VNCSession_object) {
 	delete(batchMgr, ptr)
 }
 
-func setError(str string) {
-	C.PyErr_SetGoVNCDriverError(C.CString(str))
+func setError(err error) {
+	C.PyErr_SetGoVNCDriverError(C.CString(errors.ErrorStack(err)))
 }
 
 type sessionInfo struct {

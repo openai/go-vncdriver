@@ -4,6 +4,8 @@ package main
 
 import "github.com/openai/go-vncdriver/vncgl"
 
+const compiledWithGL = true
+
 func (b *sessionInfo) initRenderer(name string) error {
 	if b.rendererSet {
 		return nil
