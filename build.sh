@@ -55,17 +55,30 @@ if [ -z "$CGO_CFLAGS" ]; then
     exit 1
 fi
 
-export CGO_LDFLAGS="${LIBJPG} $(${PYTHON} -c "import re, sysconfig;
+if [[ $(uname) == 'Darwin' ]]; then
+    # Don't link to libpython, since some installs only have a static version available,
+    # and statically linking libpython doesn't work for a C extension -- it will duplicate
+    # all the global variables, among other things.
+    #
+    # Instead, just leave Python symbols undefined and let the loader resolve them
+    # at runtime. TODO(jeremy): We might want this behavior on Linux, too.
+    #
+    # In Darwin, ld returns an error by default on undefined symbols. Use dynamic_lookup instead.
+    LDFLAGS="-undefined dynamic_lookup"
+else
+    LDFLAGS="$(${PYTHON} -c "import re, sysconfig;
 library = sysconfig.get_config_var('LIBRARY')
 match = re.search('^lib(.*)\.a', library)
 if match is None:
   raise RuntimeError('Could not parse LIBRARY: {}'.format(library))
 print('-L{} -l{}\n'.format(sysconfig.get_config_var('LIBDIR'), match.group(1)))
-")" #"
-if [ -z "$CGO_LDFLAGS" ]; then
-    echo "Could not populate CGO_LDFLAGS (see error above)"
+")"
+fi
+if [ -z "$LDFLAGS" ]; then
+    echo "Could not populate LDFLAGS (see error above)"
     exit 1
 fi
+export CGO_LDFLAGS="${LIBJPG} ${LDFLAGS}"
 
 cd "$(pwd)/.build/src/github.com/openai/go-vncdriver"
 
