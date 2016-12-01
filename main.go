@@ -84,10 +84,10 @@ var (
 
 	emptyString = C.CString("")
 
-	vncUpdatesN          *C.PyObject = nil
-	vncUpdatesPixels     *C.PyObject = nil
-	vncUpdatesRectangles *C.PyObject = nil
-	vncUpdatesBytes      *C.PyObject = nil
+	vncUpdatesN          *C.PyObject
+	vncUpdatesPixels     *C.PyObject
+	vncUpdatesRectangles *C.PyObject
+	vncUpdatesBytes      *C.PyObject
 
 	setup sync.Once
 )
@@ -585,15 +585,7 @@ func getBoolFromTuple(eventPy *C.PyObject, i int) (bool, bool) {
 	}
 
 	t := C.PyObject_IsTrue(iPyint)
-	if t == -1 {
-		return false, false
-	}
-
-	if t == 1 {
-		return true, true
-	} else {
-		return false, true
-	}
+	return t == 1, t != -1
 }
 
 func PyObject_Repr(obj *C.PyObject) (string, bool) {
