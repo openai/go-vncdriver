@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/juju/errors"
-	"github.com/op/go-logging"
+	logging "github.com/op/go-logging"
 	"github.com/openai/go-vncdriver/vncclient"
 )
 

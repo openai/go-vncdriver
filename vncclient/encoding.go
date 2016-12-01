@@ -8,7 +8,7 @@ import (
 	"io"
 
 	"github.com/juju/errors"
-	"github.com/op/go-logging"
+	logging "github.com/op/go-logging"
 	"github.com/pixiv/go-libjpeg/jpeg"
 )
 

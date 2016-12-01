@@ -7,7 +7,7 @@ import (
 	"hash/adler32"
 	"io"
 
-	"github.com/op/go-logging"
+	logging "github.com/op/go-logging"
 	"github.com/openai/go-vncdriver/flexflate"
 )
 

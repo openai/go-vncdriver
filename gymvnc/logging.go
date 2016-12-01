@@ -3,7 +3,7 @@ package gymvnc
 import (
 	"os"
 
-	"github.com/op/go-logging"
+	logging "github.com/op/go-logging"
 )
 
 func ConfigureLogging() {
