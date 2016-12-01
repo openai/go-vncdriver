@@ -6,7 +6,7 @@ A fast VNC driver.
 
 If you get an error of the form:
 
-```VNCSession has no renderer. This likely means your go_vncdriver was installed without the OpenGL viewer. See https://github.com/openai/go-vncdriver for details on how debug```
+```go_vncdriver was installed without OpenGL support. See https://github.com/openai/go-vncdriver for details on how debug.```
 
 That means that your `go-vncdriver` was built without OpenGL
 support. (The installer will first try to install with OpenGL, but
