@@ -134,7 +134,7 @@ func GoVNCDriver_VNCSession_c_init(self *C.go_vncdriver_VNCSession_object) C.int
 	defer batchLock.Unlock()
 
 	ptr := uintptr(unsafe.Pointer(self))
-	batchMgr[ptr] = info
+	batchMgr[ptr] = &info
 
 	return C.int(0)
 }
@@ -347,7 +347,7 @@ func GoVNCDriver_VNCSession_update(self, args, kwds *C.PyObject) *C.PyObject {
 }
 
 var (
-	batchMgr  = map[uintptr]sessionInfo{}
+	batchMgr  = map[uintptr]*sessionInfo{}
 	batchLock sync.Mutex
 )
 
