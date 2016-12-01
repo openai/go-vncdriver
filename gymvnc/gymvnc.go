@@ -446,7 +446,7 @@ func (c *VNCSession) connect(updates chan *vncclient.FramebufferUpdateMessage) e
 				sleepTarget = time.Duration(30) * time.Second
 			}
 
-			log.Infof("[%s] VNC server %s is not yet connectable: %s. Sleeping for %s and will try again (%s/%s)", c.label, c.config.Address, err, sleepTarget, totalSleep, c.config.StartTimeout)
+			log.Infof("[%s] Waiting on VNC server: %s. Retrying in %s (%s/%s)", c.label, err, sleepTarget, totalSleep, c.config.StartTimeout)
 
 			totalSleep += sleepTarget
 			time.Sleep(sleepTarget)
