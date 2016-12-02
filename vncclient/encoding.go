@@ -662,6 +662,9 @@ func (t *TightEncoding) Read(c *ClientConn, rect *Rectangle, r io.Reader) (Encod
 			return nil, errors.Annotate(err, "could not decode jpeg")
 		}
 		colors := make([]Color, rect.Area())
+		// Could use generic imgX.At() function, but it's faster to use the
+		// underlying implementation directly, and this section is a performance
+		// bottleneck.
 		switch img := imgX.(type) {
 		case *image.Gray:
 			log.Debug("JPEG type: Gray")
@@ -702,8 +705,9 @@ func (t *TightEncoding) Read(c *ClientConn, rect *Rectangle, r io.Reader) (Encod
 			i := 0
 			for y := 0; y < int(rect.Height); y++ {
 				for x := 0; x < int(rect.Width); x++ {
-					c := img.YCbCrAt(x, y)
-					r, g, b := color.YCbCrToRGB(c.Y, c.Cb, c.Cr)
+					yi := y*img.YStride + x
+					ci := img.COffset(x, y)
+					r, g, b := color.YCbCrToRGB(img.Y[yi], img.Cb[ci], img.Cr[ci])
 					colors[i].R = r
 					colors[i].G = g
 					colors[i].B = b
