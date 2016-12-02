@@ -5,11 +5,14 @@ import (
 	"compress/zlib"
 	"encoding/binary"
 	"fmt"
+	"image"
+	"image/color"
+	"image/jpeg"
 	"io"
 
 	"github.com/juju/errors"
 	"github.com/op/go-logging"
-	"github.com/pixiv/go-libjpeg/jpeg"
+	// "github.com/pixiv/go-libjpeg/jpeg"
 )
 
 var log = logging.MustGetLogger("vncclient")
@@ -42,7 +45,6 @@ func (f QualityLevel) Read(c *ClientConn, rect *Rectangle, r io.Reader) (Encodin
 	return f, errors.NotImplementedf("quality level is a pseudo-encoding")
 }
 
-// Compression level
 type CompressLevel uint32
 
 func (l CompressLevel) Size() int {
@@ -465,7 +467,7 @@ type readCloseResetter interface {
 	zlib.Resetter
 }
 
-// Superceded by the Fine Quality Level / Compress Level options
+// JPEGQuality is Superceded by the Fine Quality Level / Compress Level options
 type JPEGQuality uint8
 
 func (JPEGQuality) Size() int {
@@ -656,22 +658,69 @@ func (t *TightEncoding) Read(c *ClientConn, rect *Rectangle, r io.Reader) (Encod
 			return nil, err
 		}
 		buf := io.LimitReader(r, int64(length))
-		img, err := jpeg.DecodeIntoRGB(buf, &jpeg.DecoderOptions{})
+		img, err := jpeg.Decode(buf)
 		if err != nil {
 			return nil, errors.Annotate(err, "could not decode jpeg")
-		} else if img == nil {
-			return nil, errors.New("jpeg decoding returned nil (usually a result of the network being closed)")
+		}
+		colors := make([]Color, rect.Area())
+		assert(img.Rect.Min.Y == 0)
+		assert(img.Rect.Min.X == 0)
+		switch x := img.(type) {
+		case *image.Gray:
+			assert(len(x.Pix) == len(colors))
+			assert(x.Stride == x.Rect.Max.X)
+			for i, p := range x.Pix {
+				colors[i].R = p
+				colors[i].G = p
+				colors[i].B = p
+			}
+		case *image.CMYK:
+			assert(len(x.Pix) == 4*len(colors))
+			assert(x.Stride == x.Rect.Max.X*4)
+			for i := range colors {
+				r, g, b, _ = color.CMYKToRGB(x.Pix[4*i], x.Pix[4*i+1], x.Pix[4*i+2], x.Pix[4*i+3])
+				colors[i].R = r
+				colors[i].G = g
+				colors[i].B = b
+			}
+		case *image.RGBA:
+			assert(len(x.Pix) == 4*len(colors))
+			assert(x.Stride == x.Rect.Max.X*4)
+			for i := range colors {
+				colors[i].R = x.Pix[4*i]
+				colors[i].G = x.Pix[4*i+1]
+				colors[i].B = x.Pix[4*i+2]
+			}
+		case *image.YCbCr:
+			// TODO: This case is not finished yet.
+
+			assert(x.YStride == x.Rect.Max.X)
+			for i := range colors {
+				switch {
+				case YCbCrSubsampleRatio422:
+					return y*p.CStride + x/2
+				case YCbCrSubsampleRatio420:
+					return y/2*p.CStride + x/2
+				case YCbCrSubsampleRatio440:
+					return y/2*p.CStride + x
+				case YCbCrSubsampleRatio411:
+					return y*p.CStride + x/4
+				case YCbCrSubsampleRatio410:
+					return y/2 - *p.CStride + x/4
+				}
+				y := x.Y[i]
+			}
 		}
 		t.size += length
-
-		qbuf := NewQuickBuf(img.Pix)
-		colors, err := qbuf.ReadColors(rect.Area())
-		if err != nil {
-			return nil, err
-		}
 		return &TightEncoding{Colors: colors, size: t.size}, nil
 	default:
 		return nil, errors.Errorf("invalid compression control byte: %b", compressionControl)
+	}
+}
+
+func assert(b bool) {
+	if !b {
+		panic("assertion violated")
 	}
 }
 
