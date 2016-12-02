@@ -213,7 +213,6 @@ func (c *ClientConn) KeyEvent(keysym uint32, down bool) error {
 
 	var buf bytes.Buffer
 
-	// TODO: buffer write?
 	var downFlag uint8
 	if down {
 		downFlag = 1
