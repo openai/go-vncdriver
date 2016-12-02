@@ -211,7 +211,7 @@ func (c *ClientConn) KeyEvent(keysym uint32, down bool) error {
 	c.send.Lock()
 	defer c.send.Unlock()
 
-	var buf bytes.Buffer
+	buf := bytes.NewBuffer(make([]byte, 0, 8))
 
 	var downFlag uint8
 	if down {
@@ -226,7 +226,7 @@ func (c *ClientConn) KeyEvent(keysym uint32, down bool) error {
 		keysym,
 	}
 	for _, val := range data {
-		if err := binary.Write(&buf, binary.BigEndian, val); err != nil {
+		if err := binary.Write(buf, binary.BigEndian, val); err != nil {
 			return err
 		}
 	}
@@ -249,7 +249,7 @@ func (c *ClientConn) PointerEvent(mask ButtonMask, x, y uint16) error {
 	c.send.Lock()
 	defer c.send.Unlock()
 
-	var buf bytes.Buffer
+	buf := bytes.NewBuffer(make([]byte, 0, 6))
 
 	data := []interface{}{
 		uint8(5),
@@ -259,7 +259,7 @@ func (c *ClientConn) PointerEvent(mask ButtonMask, x, y uint16) error {
 	}
 
 	for _, val := range data {
-		if err := binary.Write(&buf, binary.BigEndian, val); err != nil {
+		if err := binary.Write(buf, binary.BigEndian, val); err != nil {
 			return err
 		}
 	}
