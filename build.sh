@@ -20,31 +20,6 @@ ln -s ../../../vendor/github.com/op .build/src/github.com
 ln -s ../../../vendor/github.com/juju .build/src/github.com
 ln -s ../../../vendor/github.com/pixiv .build/src/github.com
 
-# We need to prevent from linking against Anaconda Python's libpjpeg.
-#
-# Right now we hardcode these paths, and fall back to actually looking
-# it up.
-for i in /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/local/opt/jpeg-turbo/lib/libjpeg.dylib; do
-    if [ -e "$i" ]; then
-	LIBJPG="$i"
-	break
-    fi
-done
-
-# Note this might mean not getting libjpeg-turbo, which is quite nice
-# to have.
-if [ -z "${LIBJPG:-}" ]; then
-    OUTPUT=$(ld -ljpeg --trace-symbol jpeg_CreateDecompress -e 0 2>&1) || OUTPUT=
-    if ! [ -z "${OUTPUT}" ]; then
-	LIBJPG=$(echo "$OUTPUT" | cut -f 1 -d :)
-    fi
-fi
-
-if [ -z "${LIBJPG:-}" ]; then
-    echo >&2 "Could not find libjpeg. HINT: try 'sudo apt-get install libjpeg-turbo8-dev' on Ubuntu or 'brew install libjpeg-turbo' on OSX"
-    exit 1
-fi
-
 export GOPATH="$(pwd)/.build"
 export CGO_CFLAGS="$(
     ${PYTHON} -c "import numpy, sysconfig
@@ -64,9 +39,9 @@ if [[ $(uname) == 'Darwin' ]]; then
     # at runtime. TODO(jeremy): We might want this behavior on Linux, too.
     #
     # In Darwin, ld returns an error by default on undefined symbols. Use dynamic_lookup instead.
-    LDFLAGS="-undefined dynamic_lookup"
+    export CGO_LDFLAGS="-undefined dynamic_lookup"
 else
-    LDFLAGS="$(${PYTHON} -c "import re, sysconfig;
+    export CGO_LDFLAGS="$(${PYTHON} -c "import re, sysconfig;
 library = sysconfig.get_config_var('LIBRARY')
 match = re.search('^lib(.*)\.a', library)
 if match is None:
@@ -74,11 +49,10 @@ if match is None:
 print('-L{} -l{}\n'.format(sysconfig.get_config_var('LIBDIR'), match.group(1)))
 ")"
 fi
-if [ -z "$LDFLAGS" ]; then
-    echo "Could not populate LDFLAGS (see error above)"
+if [ -z "$CGO_LDFLAGS" ]; then
+    echo "Could not populate CGO_LDFLAGS (see error above)"
     exit 1
 fi
-export CGO_LDFLAGS="${LIBJPG} ${LDFLAGS}"
 
 cd "$(pwd)/.build/src/github.com/openai/go-vncdriver"
 

@@ -12,7 +12,6 @@ import (
 
 	"github.com/juju/errors"
 	"github.com/op/go-logging"
-	// "github.com/pixiv/go-libjpeg/jpeg"
 )
 
 var log = logging.MustGetLogger("vncclient")
@@ -658,57 +657,58 @@ func (t *TightEncoding) Read(c *ClientConn, rect *Rectangle, r io.Reader) (Encod
 			return nil, err
 		}
 		buf := io.LimitReader(r, int64(length))
-		img, err := jpeg.Decode(buf)
+		imgX, err := jpeg.Decode(buf)
 		if err != nil {
 			return nil, errors.Annotate(err, "could not decode jpeg")
 		}
 		colors := make([]Color, rect.Area())
-		assert(img.Rect.Min.Y == 0)
-		assert(img.Rect.Min.X == 0)
-		switch x := img.(type) {
+		switch img := imgX.(type) {
 		case *image.Gray:
-			assert(len(x.Pix) == len(colors))
-			assert(x.Stride == x.Rect.Max.X)
-			for i, p := range x.Pix {
+			log.Debug("JPEG type: Gray")
+			assert(len(img.Pix) == len(colors))
+			assert(img.Stride == img.Rect.Max.X)
+			assert(img.Rect.Min.Y == 0)
+			assert(img.Rect.Min.X == 0)
+			for i, p := range img.Pix {
 				colors[i].R = p
 				colors[i].G = p
 				colors[i].B = p
 			}
 		case *image.CMYK:
-			assert(len(x.Pix) == 4*len(colors))
-			assert(x.Stride == x.Rect.Max.X*4)
+			log.Debug("JPEG type: CMYK")
+			assert(len(img.Pix) == 4*len(colors))
+			assert(img.Stride == img.Rect.Max.X*4)
+			assert(img.Rect.Min.Y == 0)
+			assert(img.Rect.Min.X == 0)
 			for i := range colors {
-				r, g, b, _ = color.CMYKToRGB(x.Pix[4*i], x.Pix[4*i+1], x.Pix[4*i+2], x.Pix[4*i+3])
+				r, g, b := color.CMYKToRGB(img.Pix[4*i], img.Pix[4*i+1], img.Pix[4*i+2], img.Pix[4*i+3])
 				colors[i].R = r
 				colors[i].G = g
 				colors[i].B = b
 			}
 		case *image.RGBA:
-			assert(len(x.Pix) == 4*len(colors))
-			assert(x.Stride == x.Rect.Max.X*4)
+			log.Debug("JPEG type: RGBA")
+			assert(len(img.Pix) == 4*len(colors))
+			assert(img.Stride == img.Rect.Max.X*4)
 			for i := range colors {
-				colors[i].R = x.Pix[4*i]
-				colors[i].G = x.Pix[4*i+1]
-				colors[i].B = x.Pix[4*i+2]
+				colors[i].R = img.Pix[4*i]
+				colors[i].G = img.Pix[4*i+1]
+				colors[i].B = img.Pix[4*i+2]
 			}
 		case *image.YCbCr:
-			// TODO: This case is not finished yet.
-
-			assert(x.YStride == x.Rect.Max.X)
-			for i := range colors {
-				switch {
-				case YCbCrSubsampleRatio422:
-					return y*p.CStride + x/2
-				case YCbCrSubsampleRatio420:
-					return y/2*p.CStride + x/2
-				case YCbCrSubsampleRatio440:
-					return y/2*p.CStride + x
-				case YCbCrSubsampleRatio411:
-					return y*p.CStride + x/4
-				case YCbCrSubsampleRatio410:
-					return y/2 - *p.CStride + x/4
+			log.Debug("JPEG type: YCbCr")
+			assert(img.Rect.Min.Y == 0)
+			assert(img.Rect.Min.X == 0)
+			i := 0
+			for y := 0; y < int(rect.Height); y++ {
+				for x := 0; x < int(rect.Width); x++ {
+					c := img.YCbCrAt(x, y)
+					r, g, b := color.YCbCrToRGB(c.Y, c.Cb, c.Cr)
+					colors[i].R = r
+					colors[i].G = g
+					colors[i].B = b
+					i++
 				}
-				y := x.Y[i]
 			}
 		}
 		t.size += length
