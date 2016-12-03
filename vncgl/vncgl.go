@@ -314,7 +314,7 @@ func connect(imgs chan *image.RGBA) (*vncclient.ClientConn, error) {
 			log.Infof("sleeping: %v", delta)
 			time.Sleep(delta)
 		} else {
-			log.Infof("full behind by: %v", delta)
+			log.Infof("fell behind by: %v", delta)
 		}
 	}
 }
