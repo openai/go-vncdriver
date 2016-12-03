@@ -24,12 +24,14 @@ ln -s ../../../vendor/github.com/pixiv .build/src/github.com
 #
 # Right now we hardcode these paths, and fall back to actually looking
 # it up.
-for i in /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/local/opt/jpeg-turbo/lib/libjpeg.dylib; do
-    if [ -e "$i" ]; then
-	LIBJPG="$i"
-	break
-    fi
-done
+if [ -z "${LIBJPG:-}" ]; then
+	for i in /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/local/opt/jpeg-turbo/lib/libjpeg.dylib; do
+		if [ -e "$i" ]; then
+		LIBJPG="$i"
+		break
+		fi
+	done
+fi
 
 # Note this might mean not getting libjpeg-turbo, which is quite nice
 # to have.
