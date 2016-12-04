@@ -1,13 +1,20 @@
 import os
-import re
 import subprocess
 import sys
 
 from distutils.command.build import build as DistutilsBuild
-from setuptools import setup
+from distutils.command.build_ext import build_ext as DistutilsBuildExt
+from setuptools import setup, Extension
 
 def here():
     return os.path.join('.', os.path.dirname(__file__))
+
+class BuildExt(DistutilsBuildExt):
+    def run(self):
+        pass
+
+    def build_extension(self, ext):
+        pass
 
 class BuildError(Exception):
     pass
@@ -64,7 +71,8 @@ You can obtain a recent Go build from https://golang.org/doc/install. If on Ubun
 
 setup(name='go_vncdriver',
       version='0.4.16',
-      cmdclass={'build': Build},
+      cmdclass={'build': Build, 'build_ext': BuildExt},
+      ext_modules=[Extension('go_vncdriver', [])],
       packages=['go_vncdriver'],
       package_dir={'go_vncdriver': '.'},
       package_data={'go_vncdriver': ['go_vncdriver.so']},
