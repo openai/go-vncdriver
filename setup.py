@@ -77,4 +77,5 @@ setup(name='go_vncdriver',
       package_dir={'go_vncdriver': '.'},
       package_data={'go_vncdriver': ['go_vncdriver.so']},
       setup_requires=['numpy'],
+      install_requires=['numpy'],
 )
