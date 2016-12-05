@@ -50,7 +50,7 @@ sudo apt-get install -y python-dev make golang libjpeg-turbo8-dev
 On Ubuntu 14.04:
 
 ```
-sudo add-apt-repository ppa:ubuntu-lxc/lxd-stable
+sudo add-apt-repository ppa:ubuntu-lxc/lxd-stable  # for newer golang
 sudo apt-get update
 sudo apt-get install -y python-dev make golang libjpeg-turbo8-dev
 ```
