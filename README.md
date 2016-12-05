@@ -35,10 +35,6 @@ Once you've fixed the issue, you should reinstall `go-vncdriver` via
 
 ## Installation
 
-By default, `go_vncdriver` will try to include OpenGL rendering. If
-that build fails, it will fall back to omitting OpenGL rendering. (You
-probably don't care about OpenGL rendering on a server anyway.)
-
 ### Dependencies
 
 On Ubuntu 16.04:
@@ -67,9 +63,10 @@ then just install `brew install libjpeg-turbo`.)
 
 #### Rendering
 
-The best way to see what your agent sees is to enable OpenGL
-rendering. You'll need X and OpenGL development headers. On Ubuntu,
-this is:
+OpenGL rendering is optional, but it's the best way to see what your
+agent sees. To enable it, you'll need X and OpenGL development headers.
+
+On Ubuntu, this is:
 
 ```
 sudo apt-get install libx11-dev libxcursor-dev libxrandr-dev \
