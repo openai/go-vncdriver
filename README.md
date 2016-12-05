@@ -48,7 +48,7 @@ installed:
 sudo apt-get install -y python-dev make golang libjpeg-turbo8-dev
 ```
 
-Same on Ubuntu 14.04, but the `golang` package is too old. Follow the installation instruction's on the [Go website](https://golang.org/doc/install) instead.
+Same on Ubuntu 14.04, but the `golang` package is too old. Follow the installation instructions on the [Go website](https://golang.org/doc/install) instead.
 
 On OSX, the following should suffice:
 
