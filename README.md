@@ -13,7 +13,7 @@ support. (The installer will first try to install with OpenGL, but
 will fall back to installing without it.)
 
 To figure out what happened, the easiest approach is to clone this
-window and run `./build.sh`, which should print out the error upon
+repo and run `./build.sh`, which should print out the error upon
 installing with OpenGL:
 
 ```
@@ -64,7 +64,9 @@ then just install `brew install libjpeg-turbo`.)
 #### Rendering
 
 OpenGL rendering is optional, but it's the best way to see what your
-agent sees. To enable it, you'll need X and OpenGL development headers.
+agent sees.
+
+To enable it, you'll need X and OpenGL development headers.
 
 On Ubuntu, this is:
 
