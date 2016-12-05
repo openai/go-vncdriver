@@ -41,16 +41,21 @@ probably don't care about OpenGL rendering on a server anyway.)
 
 ### Dependencies
 
-To install on Ubuntu 16.04, you need to have the following packages
-installed:
+On Ubuntu 16.04:
 
 ```
 sudo apt-get install -y python-dev make golang libjpeg-turbo8-dev
 ```
 
-Same on Ubuntu 14.04, but the `golang` package is too old. Follow the installation instructions on the [Go website](https://golang.org/doc/install) instead.
+On Ubuntu 14.04:
 
-On OSX, the following should suffice:
+```
+sudo add-apt-repository ppa:ubuntu-lxc/lxd-stable
+sudo apt-get update
+sudo apt-get install -y python-dev make golang libjpeg-turbo8-dev
+```
+
+On OSX:
 
 ```
 brew install libjpeg-turbo golang
