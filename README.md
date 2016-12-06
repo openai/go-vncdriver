@@ -30,8 +30,10 @@ fatal error: X11/extensions/XInput.h: No such file or directory
 fatal error: GL/gl.h: No such file or directory
 ```
 
-Once you've fixed the issue, you should reinstall `go-vncdriver` via
-`pip install --ignore-installed go-vncdriver`.
+Once you've fixed the issue, you should reinstall `go-vncdriver` by running the following command from `go-vncdriver` folder:
+```
+pip install -e ./
+```
 
 ## Installation
 
