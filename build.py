@@ -24,7 +24,10 @@ def build():
     os.chdir(os.path.dirname(__file__))
 
     # Clear .build
-    shutil.rmtree('.build')
+    try:
+        shutil.rmtree('.build')
+    except FileNotFoundError:
+        pass
 
     os.makedirs(os.path.normpath('.build/src/github.com/openai'))
     os.symlink('../../../..', '.build/src/github.com/openai/go-vncdriver')
