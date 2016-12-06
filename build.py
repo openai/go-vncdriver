@@ -29,12 +29,11 @@ def build():
     except FileNotFoundError:
         pass
 
+    # Set up temporary GOPATH
     os.makedirs(os.path.normpath('.build/src/github.com/openai'))
     os.symlink('../../../..', '.build/src/github.com/openai/go-vncdriver')
-    os.symlink('../../../vendor/github.com/go-gl', '.build/src/github.com/go-gl')
-    os.symlink('../../../vendor/github.com/op', '.build/src/github.com/op')
-    os.symlink('../../../vendor/github.com/juju', '.build/src/github.com/juju')
-    os.symlink('../../../vendor/github.com/pixiv', '.build/src/github.com/pixiv')
+    os.environ['GOPATH'] = os.path.join(os.getcwd(), '.build')
+    os.environ['GO15VENDOREXPERIMENT'] = '1' # Needed on Go 1.5, no-op on Go 1.6+
 
     # We need to prevent from linking against Anaconda Python's libpjpeg.
     #
@@ -57,7 +56,6 @@ def build():
     if not libjpg:
         raise BuildException("Could not find libjpeg. HINT: try 'sudo apt-get install libjpeg-turbo8-dev' on Ubuntu or 'brew install libjpeg-turbo' on OSX")
 
-    os.environ['GOPATH'] = os.path.join(os.getcwd(), '.build')
     os.environ['CGO_CFLAGS'] = '-I{} -I{}'.format(
             numpy.get_include(), sysconfig.get_config_var('INCLUDEPY'))
 
@@ -80,10 +78,8 @@ def build():
 
     os.environ['CGO_LDFLAGS'] = ' '.join([libjpg, ldflags])
 
-    os.chdir(os.path.normpath(os.getcwd() + '/.build/src/github.com/openai/go-vncdriver'))
-
     def build_no_gl():
-        cmd = 'go build -tags no_gl -buildmode=c-shared -o go_vncdriver.so'
+        cmd = 'go build -tags no_gl -buildmode=c-shared -o go_vncdriver.so github.com/openai/go-vncdriver'
         eprint('Building without OpenGL: GOPATH={} {}'.format(os.getenv('GOPATH'), cmd))
         if subprocess.run(cmd.split()).returncode:
             raise BuildException('''
@@ -94,7 +90,7 @@ Build failed. HINT:
 ''')
 
     def build_gl():
-        cmd = 'go build -buildmode=c-shared -o go_vncdriver.so'
+        cmd = 'go build -buildmode=c-shared -o go_vncdriver.so github.com/openai/go-vncdriver'
         eprint('Building with OpenGL: GOPATH={} {}. (Set GO_VNCDRIVER_NOGL to build without OpenGL.)'.format(os.getenv('GOPATH'), cmd))
         return not subprocess.run(cmd.split()).returncode
 
