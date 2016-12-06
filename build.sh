@@ -57,7 +57,7 @@ if [ -z "$CGO_CFLAGS" ]; then
     exit 1
 fi
 
-if [[ $(uname) == 'Darwin' ]]; then
+if [ $(uname) = 'Darwin' ]; then
     # Don't link to libpython, since some installs only have a static version available,
     # and statically linking libpython doesn't work for a C extension -- it will duplicate
     # all the global variables, among other things.
