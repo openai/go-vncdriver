@@ -13,13 +13,13 @@ support. (The installer will first try to install with OpenGL, but
 will fall back to installing without it.)
 
 To figure out what happened, the easiest approach is to clone this
-repo and run `./build.sh`, which should print out the error upon
+repo and run `./build.py`, which should print out the error upon
 installing with OpenGL:
 
 ```
 git clone https://github.com/openai/go-vncdriver.git
 cd go-vncdriver
-./build.sh
+./build.py
 ```
 
 If you get errors like below then you need to install the [rendering dependencies](https://github.com/openai/go-vncdriver#rendering):
