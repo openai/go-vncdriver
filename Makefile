@@ -1,10 +1,10 @@
-.PHONY: build clean upload install test
+.PHONY: build no_gl clean upload install test
 
 build:
-	./build.sh
+	./build.py
 
 no_gl:
-	GO_VNCDRIVER_NOGL=true ./build.sh
+	GO_VNCDRIVER_NOGL=true ./build.py
 
 install:
 	pip install -r requirements.txt

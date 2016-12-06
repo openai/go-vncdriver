@@ -1,4 +1,3 @@
-import os
 import subprocess
 import sys
 
@@ -6,8 +5,7 @@ from distutils.command.build import build as DistutilsBuild
 from distutils.command.build_ext import build_ext as DistutilsBuildExt
 from setuptools import setup, Extension
 
-def here():
-    return os.path.join('.', os.path.dirname(__file__))
+import build
 
 class BuildExt(DistutilsBuildExt):
     def run(self):
@@ -58,15 +56,12 @@ You can obtain a recent Go build from https://golang.org/doc/install. If on Ubun
 """)
 
     def build(self):
-        os.environ['GO_VNCDRIVER_PYTHON'] = sys.executable
-        cmd = ['make', 'build']
         try:
-            subprocess.check_call(cmd, cwd=here())
-        except subprocess.CalledProcessError as e:
-            sys.stderr.write("Could not build go_vncdriver: %s\n" % e)
+            sys.stderr.write('Running new build\n')
+            build.build()
+        except build.BuildException as e:
+            sys.stderr.write('Could not build go_vncdriver: %s\n' % e)
             raise
-        except OSError as e:
-            raise BuildError("Unable to execute '{}'. HINT: are you sure `make` is installed? (original error: {}.)".format(' '.join(cmd), e))
         DistutilsBuild.run(self)
 
 setup(name='go_vncdriver',
