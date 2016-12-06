@@ -29,11 +29,13 @@ def build():
     except FileNotFoundError:
         pass
 
+    env = {}
+
     # Set up temporary GOPATH
     os.makedirs(os.path.normpath('.build/src/github.com/openai'))
     os.symlink('../../../..', '.build/src/github.com/openai/go-vncdriver')
-    os.environ['GOPATH'] = os.path.join(os.getcwd(), '.build')
-    os.environ['GO15VENDOREXPERIMENT'] = '1' # Needed on Go 1.5, no-op on Go 1.6+
+    env['GOPATH'] = os.path.join(os.getcwd(), '.build')
+    env['GO15VENDOREXPERIMENT'] = '1' # Needed on Go 1.5, no-op on Go 1.6+
 
     # We need to prevent from linking against Anaconda Python's libpjpeg.
     #
@@ -56,7 +58,7 @@ def build():
     if not libjpg:
         raise BuildException("Could not find libjpeg. HINT: try 'sudo apt-get install libjpeg-turbo8-dev' on Ubuntu or 'brew install libjpeg-turbo' on OSX")
 
-    os.environ['CGO_CFLAGS'] = '-I{} -I{}'.format(
+    env['CGO_CFLAGS'] = '-I{} -I{}'.format(
             numpy.get_include(), sysconfig.get_config_var('INCLUDEPY'))
 
     if os.uname()[0] == 'Darwin':
@@ -76,7 +78,7 @@ def build():
           raise BuildException('Could not parse LIBRARY: {}'.format(library))
         ldflags = '-L{} -l{}'.format(sysconfig.get_config_var('LIBDIR'), match.group(1))
 
-    os.environ['CGO_LDFLAGS'] = ' '.join([libjpg, ldflags])
+    env['CGO_LDFLAGS'] = ' '.join([libjpg, ldflags])
 
     def build_no_gl():
         cmd = 'go build -tags no_gl -buildmode=c-shared -o go_vncdriver.so github.com/openai/go-vncdriver'
@@ -94,7 +96,11 @@ Build failed. HINT:
         eprint('Building with OpenGL: GOPATH={} {}. (Set GO_VNCDRIVER_NOGL to build without OpenGL.)'.format(os.getenv('GOPATH'), cmd))
         return not subprocess.run(cmd.split()).returncode
 
-    eprint('Env info:\n\nexport CGO_LDFLAGS={}\nexport CGO_CFLAGS={}\n'.format(os.getenv('CGO_LDFLAGS'), os.getenv('CGO_CFLAGS')))
+    eprint('Env info:\n')
+    for k, v in env.items():
+        eprint('export {}={}'.format(k, v))
+        os.environ[k] = v
+    eprint()
 
     if os.getenv('GO_VNCDRIVER_NOGL'):
         build_no_gl()
