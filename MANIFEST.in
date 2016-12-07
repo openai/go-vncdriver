@@ -1,4 +1,4 @@
-include Makefile build.sh
+include Makefile build.py
 include Godeps/Godeps.json
 recursive-include vendor *.h *.m
 global-include *.go *.c
