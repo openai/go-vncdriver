@@ -21,13 +21,11 @@ def main():
         sys.exit(e)
 
 def build():
-    os.chdir(os.path.dirname(__file__))
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     # Clear .build
-    try:
+    if os.path.exists('.build'):
         shutil.rmtree('.build')
-    except FileNotFoundError:
-        pass
 
     env = {}
 
@@ -51,12 +49,11 @@ def build():
     # Note this might mean not getting libjpeg-turbo, which is quite nice
     # to have. Also, it doesn't work on macOS.
     if not libjpg:
-        result = subprocess.run(['ld', '-ljpeg', '--trace-symbol', 'jpeg_CreateDecompress', '-e', '0'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        if not result.returncode:
-            libjpg = result.stdout.decode().split(':')[0]
-
-    if not libjpg:
-        raise BuildException("Could not find libjpeg. HINT: try 'sudo apt-get install libjpeg-turbo8-dev' on Ubuntu or 'brew install libjpeg-turbo' on OSX")
+        try:
+            output = subprocess.check_output(['ld', '-ljpeg', '--trace-symbol', 'jpeg_CreateDecompress', '-e', '0'], stderr=subprocess.STDOUT)
+            libjpg = output.decode().split(':')[0]
+        except (subprocess.CalledProcessError, OSError):
+            raise BuildException("Could not find libjpeg. HINT: try 'sudo apt-get install libjpeg-turbo8-dev' on Ubuntu or 'brew install libjpeg-turbo' on OSX")
 
     env['CGO_CFLAGS'] = '-I{} -I{}'.format(
             numpy.get_include(), sysconfig.get_config_var('INCLUDEPY'))
@@ -83,7 +80,7 @@ def build():
     def build_no_gl():
         cmd = 'go build -tags no_gl -buildmode=c-shared -o go_vncdriver.so github.com/openai/go-vncdriver'
         eprint('Building without OpenGL: GOPATH={} {}'.format(os.getenv('GOPATH'), cmd))
-        if subprocess.run(cmd.split()).returncode:
+        if subprocess.call(cmd.split()):
             raise BuildException('''
 Build failed. HINT:
 
@@ -94,7 +91,7 @@ Build failed. HINT:
     def build_gl():
         cmd = 'go build -buildmode=c-shared -o go_vncdriver.so github.com/openai/go-vncdriver'
         eprint('Building with OpenGL: GOPATH={} {}. (Set GO_VNCDRIVER_NOGL to build without OpenGL.)'.format(os.getenv('GOPATH'), cmd))
-        return not subprocess.run(cmd.split()).returncode
+        return not subprocess.call(cmd.split())
 
     eprint('Env info:\n')
     for k, v in env.items():
