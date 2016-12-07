@@ -98,7 +98,7 @@ Build failed. HINT:
 
     eprint('Env info:\n')
     for k, v in env.items():
-        eprint('export {}={}'.format(k, v))
+        eprint("export {}='{}'".format(k, v))
         os.environ[k] = v
     eprint()
 
