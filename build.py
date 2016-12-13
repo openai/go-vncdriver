@@ -3,6 +3,7 @@
 # Builds against your current Python version. You must have numpy installed.
 
 from __future__ import print_function
+import distutils.sysconfig
 import os
 import numpy
 import re
@@ -55,8 +56,13 @@ def build():
         except (subprocess.CalledProcessError, OSError):
             raise BuildException("Could not find libjpeg. HINT: try 'sudo apt-get install libjpeg-turbo8-dev' on Ubuntu or 'brew install libjpeg-turbo' on OSX")
 
-    env['CGO_CFLAGS'] = '-I{} -I{}'.format(
-            numpy.get_include(), sysconfig.get_config_var('INCLUDEPY'))
+    numpy_include = numpy.get_include()
+    py_include = distutils.sysconfig.get_python_inc()
+    plat_py_include = distutils.sysconfig.get_python_inc(plat_specific=1)
+    includes = [numpy_include, py_include]
+    if plat_py_include != py_include:
+        includes.append(plat_py_include)
+    env['CGO_CFLAGS'] = '-I' + ' -I'.join(includes)
 
     if os.uname()[0] == 'Darwin':
         # Don't link to libpython, since some installs only have a static version available,
