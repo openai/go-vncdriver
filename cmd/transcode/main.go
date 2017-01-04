@@ -275,7 +275,7 @@ func main() {
 			check(binary.Write(w, binary.BigEndian, uint16(len(rects))))
 			for _, r := range rects {
 				for _, x := range []interface{}{
-					r.X, r.Y, r.Width, r.Height, r.Enc.Type(),
+					r.X, r.Y, r.Width, r.Height, new(vncclient.RawEncoding).Type(),
 				} {
 					check(binary.Write(w, binary.BigEndian, x))
 				}
