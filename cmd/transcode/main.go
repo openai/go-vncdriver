@@ -48,10 +48,7 @@ type fbsReader struct {
 
 func (r *fbsReader) read4() ([]byte, error) {
 	b := make([]byte, 4)
-	n, err := r.r.Read(b)
-	if n < 4 && err == nil {
-		err = io.ErrUnexpectedEOF
-	}
+	_, err := io.ReadFull(r.r, b)
 	return b, err
 }
 
