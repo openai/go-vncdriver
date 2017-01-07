@@ -15,11 +15,17 @@ will fall back to installing without it.)
 To figure out what happened, the easiest approach is to clone this
 repo and run `./build.py`, which should print out the error upon
 installing with OpenGL:
-
 ```
 git clone https://github.com/openai/go-vncdriver.git
 cd go-vncdriver
 ./build.py
+```
+(NB if you're trying to compile for python 3.x
+and your python binary is called python3 you'll need to modify the 
+first line of build.py to the following otherwise the resulting
+.so file will only work with python 2.x
+```
+#!/usr/bin/env python3
 ```
 
 If you get errors like below then you need to install the [rendering dependencies](https://github.com/openai/go-vncdriver#rendering):
