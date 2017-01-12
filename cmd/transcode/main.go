@@ -216,10 +216,14 @@ func main() {
 		check(vncclient.ReadPixelFormat(bytes.NewReader(b[4:20]), &pf))
 		if !(pf.BPP == 32 &&
 			pf.Depth == 24 &&
+			!pf.BigEndian &&
 			pf.TrueColor &&
 			pf.RedMax == 255 &&
 			pf.GreenMax == 255 &&
-			pf.BlueMax == 255) {
+			pf.BlueMax == 255 &&
+			pf.RedShift == 0x10 &&
+			pf.GreenShift == 0x8 &&
+			pf.BlueShift == 0x0) {
 			log.Fatalf("Unsupported pixel format: %#v\n", pf)
 		}
 		emit(append(b, next(int(bytes2Uint32(b[20:24])))...))
@@ -257,26 +261,35 @@ func main() {
 			}
 			check(err)
 			rects := msg.(*vncclient.FramebufferUpdateMessage).Rectangles
-			size := 4
+
+			// Start counting how many bytes we're going to write
+			size := 0
+			size += 4 // account for header (see below)
 			for _, r := range rects {
-				size += 12
+				size += 12 // every Rectangle starts out with four 2-byte fields (X, Y, W, H)
+				// and a 4-byte encoding type, and then also contains pixels
 				if ce, ok := r.Enc.(*cursorEncoding); ok {
-					size += len(ce.b)
+					size += len(ce.b) // if it's a cursor encoding, it already got parsed
 				} else {
-					size += r.Area() * 4
+					size += r.Area() * 4 // if it's pixels, then it's four bytes per pixel
 				}
 			}
+
+			// Write FramebufferUpdate header
 			check(binary.Write(w, binary.BigEndian, uint32(size)))
-			check(w.Write(b))
-			check(w.Write([]byte{0})) // padding
-			check(binary.Write(w, binary.BigEndian, uint16(len(rects))))
+			check(w.Write(b))                                            // message type
+			check(w.Write([]byte{0}))                                    // padding
+			check(binary.Write(w, binary.BigEndian, uint16(len(rects)))) // number of rectangles
+
+			// Write FramebufferUpdate rectangles
 			for _, r := range rects {
 				for _, x := range []interface{}{
-					r.X, r.Y, r.Width, r.Height, new(vncclient.RawEncoding).Type(),
+					r.X, r.Y, r.Width, r.Height, r.Enc.Type(),
 				} {
 					check(binary.Write(w, binary.BigEndian, x))
 				}
 				var colors []vncclient.Color
+
 				switch e := r.Enc.(type) {
 				case *vncclient.TightEncoding:
 					colors = e.Colors
