@@ -37,13 +37,13 @@ func (e *cursorEncoding) Read(c *vncclient.ClientConn, rect *vncclient.Rectangle
 	b := make([]byte, sz)
 	_, err := io.ReadFull(r, b)
 	return &cursorEncoding{b}, err
-
 }
 
 type fbsReader struct {
 	r         io.Reader
 	timestamp [4]byte
 	n         int
+	atEOF     bool
 }
 
 func (r *fbsReader) read4() ([]byte, error) {
@@ -53,8 +53,11 @@ func (r *fbsReader) read4() ([]byte, error) {
 }
 
 func (r *fbsReader) Read(p []byte) (n int, err error) {
+	if r.atEOF {
+		return 0, io.EOF
+	}
 	if r.n == 4 {
-		b, err := r.read4()
+		b, err := r.read4() // end of FBS chunk, so read timestamp
 		if err != nil {
 			return 0, err
 		}
@@ -62,12 +65,13 @@ func (r *fbsReader) Read(p []byte) (n int, err error) {
 		r.n = 0
 	}
 	if r.n == 0 {
-		b, err := r.read4()
+		b, err := r.read4() // start of FBS chunk, so read length
 		if err != nil {
 			return 0, err
 		}
 		r.n = int(bytes2Uint32(b))
 		if r.n == 0 {
+			r.atEOF = true
 			return 0, io.EOF
 		}
 		r.n += 4 // for the timestamp bytes at the end
@@ -151,9 +155,10 @@ func main() {
 		nextSafe = func(n int) []byte {
 			b := make([]byte, n)
 			_, err := io.ReadFull(r, b)
-			if err == io.ErrUnexpectedEOF {
+			if err == io.ErrUnexpectedEOF || err == io.EOF {
 				os.Exit(0)
 			}
+			check(err)
 			return b
 		}
 
@@ -256,6 +261,7 @@ func main() {
 		// FramebufferUpdate
 		case 0:
 			msg, err := fbu.Read(conn, r)
+
 			if err == io.EOF {
 				return
 			}
@@ -303,6 +309,7 @@ func main() {
 				}
 			}
 			check(w.Write(r.timestamp[:]))
+
 		// SetColorMapEntries
 		case 1:
 			log.Fatal("SetColorMapEntries not supported")
