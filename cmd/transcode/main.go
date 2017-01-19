@@ -155,7 +155,7 @@ func main() {
 		nextSafe = func(n int) []byte {
 			b := make([]byte, n)
 			_, err := io.ReadFull(r, b)
-			if err == io.ErrUnexpectedEOF || err == io.EOF {
+			if err == io.EOF || err == io.ErrUnexpectedEOF {
 				os.Exit(0)
 			}
 			check(err)
@@ -213,26 +213,26 @@ func main() {
 
 			vncAuth()
 		}
-
-		// ServerInit message
-		//	2+2+16+4+N bytes
-		b := next(24)
-		var pf vncclient.PixelFormat
-		check(vncclient.ReadPixelFormat(bytes.NewReader(b[4:20]), &pf))
-		if !(pf.BPP == 32 &&
-			pf.Depth == 24 &&
-			!pf.BigEndian &&
-			pf.TrueColor &&
-			pf.RedMax == 255 &&
-			pf.GreenMax == 255 &&
-			pf.BlueMax == 255 &&
-			pf.RedShift == 0x10 &&
-			pf.GreenShift == 0x8 &&
-			pf.BlueShift == 0x0) {
-			log.Fatalf("Unsupported pixel format: %#v\n", pf)
-		}
-		emit(append(b, next(int(bytes2Uint32(b[20:24])))...))
 	}
+
+	// ServerInit message
+	//	2+2+16+4+N bytes
+	b := next(24)
+	var pf vncclient.PixelFormat
+	check(vncclient.ReadPixelFormat(bytes.NewReader(b[4:20]), &pf))
+	if !(pf.BPP == 32 &&
+		pf.Depth == 24 &&
+		!pf.BigEndian &&
+		pf.TrueColor &&
+		pf.RedMax == 255 &&
+		pf.GreenMax == 255 &&
+		pf.BlueMax == 255 &&
+		pf.RedShift == 16 &&
+		pf.GreenShift == 8 &&
+		pf.BlueShift == 0) {
+		log.Fatalf("Unsupported pixel format: %#v\n", pf)
+	}
+	emit(append(b, next(int(bytes2Uint32(b[20:24])))...))
 
 	var fbu vncclient.FramebufferUpdateMessage
 	conn := &vncclient.ClientConn{
@@ -241,17 +241,7 @@ func main() {
 			new(vncclient.RawEncoding),
 			new(cursorEncoding),
 		},
-		PixelFormat: vncclient.PixelFormat{
-			BPP:        32,
-			Depth:      24,
-			TrueColor:  true,
-			RedMax:     255,
-			GreenMax:   255,
-			BlueMax:    255,
-			RedShift:   0,
-			GreenShift: 8,
-			BlueShift:  16,
-		},
+		PixelFormat: pf,
 	}
 	//
 	// Most of the processing time is spent here, transcoding FramebufferUpdate messages
@@ -262,7 +252,7 @@ func main() {
 		case 0:
 			msg, err := fbu.Read(conn, r)
 
-			if err == io.EOF {
+			if err == io.EOF || err == io.ErrUnexpectedEOF {
 				return
 			}
 			check(err)
@@ -289,12 +279,10 @@ func main() {
 
 			// Write FramebufferUpdate rectangles
 			for _, r := range rects {
-				for _, x := range []interface{}{
-					r.X, r.Y, r.Width, r.Height, r.Enc.Type(),
-				} {
-					check(binary.Write(w, binary.BigEndian, x))
-				}
 				var colors []vncclient.Color
+
+				isCursor := false
+				newEncType := int32(0) // regardless of input type, we're outputting raw (unless it's cursor)
 
 				switch e := r.Enc.(type) {
 				case *vncclient.TightEncoding:
@@ -302,10 +290,31 @@ func main() {
 				case *vncclient.RawEncoding:
 					colors = e.Colors
 				case *cursorEncoding:
-					check(w.Write(e.b))
+					isCursor = true
+					newEncType = r.Enc.Type() // keep it as cursor type
 				}
+
+				for _, x := range []interface{}{
+					r.X, r.Y, r.Width, r.Height, newEncType,
+				} {
+					check(binary.Write(w, binary.BigEndian, x))
+				}
+
+				if isCursor {
+					check(w.Write(r.Enc.(*cursorEncoding).b))
+				}
+
 				for _, c := range colors {
-					check(w.Write([]byte{c.R, c.G, c.B, 0}))
+					colorOrder := (uint32(c.R) << conn.PixelFormat.RedShift) +
+						(uint32(c.G) << conn.PixelFormat.GreenShift) +
+						(uint32(c.B) << conn.PixelFormat.BlueShift)
+
+					// Write the RGB bytes out in little-endian order,
+					// having verified "!pf.BigEndian" above
+					check(w.Write([]byte{uint8(colorOrder),
+						uint8(colorOrder >> 8),
+						uint8(colorOrder >> 16),
+						0}))
 				}
 			}
 			check(w.Write(r.timestamp[:]))
