@@ -6,13 +6,9 @@ transcode:
 build: transcode
 
 image:
-	@if [ $(shell uname) = Darwin ]; then \
-		echo "-----------------------------------"; \
-		echo "THIS IMAGE MUST BE BUILT ON LINUX!!"; \
-		echo "-----------------------------------"; \
-		exit 1; \
-	fi
-	go build --ldflags '-extldflags "-static"'
+	cd ../.. && docker build --tag transcode-builder -f cmd/transcode/builder.dockerfile .
+	docker run --rm transcode-builder cat /go/bin/transcode > transcode
+	chmod +x transcode
 	docker build -t $(URL):latest .
 	docker tag $(URL):latest $(URL):$$(cat VERSION)
 
