@@ -40,7 +40,7 @@ func (e *cursorEncoding) Read(c *vncclient.ClientConn, rect *vncclient.Rectangle
 }
 
 type fbsReader struct {
-	buf       *bytes.Buffer
+	buf       bytes.Buffer
 	r         io.Reader
 	timestamp [4]byte
 }
@@ -52,20 +52,18 @@ func (r *fbsReader) read4() ([]byte, error) {
 }
 
 func (r *fbsReader) Read(p []byte) (n int, err error) {
-	if r.buf == nil || r.buf.Len() == 0 {
+	if r.buf.Len() == 0 {
 		// read length
 		b, err := r.read4()
 		if err != nil {
 			return 0, err
 		}
-		n := int(bytes2Uint32(b))
+		n := int64(bytes2Uint32(b))
 
 		// read data
-		data := make([]byte, n)
-		if _, err := io.ReadFull(r.r, data); err != nil {
+		if _, err := io.Copy(&r.buf, io.LimitReader(r.r, n)); err != nil {
 			return 0, io.ErrUnexpectedEOF
 		}
-		r.buf = bytes.NewBuffer(data)
 
 		// read timestamp
 		b, err = r.read4()
@@ -75,9 +73,6 @@ func (r *fbsReader) Read(p []byte) (n int, err error) {
 		copy(r.timestamp[:], b)
 	}
 
-	if len(p) > r.buf.Len() {
-		p = p[:r.buf.Len()]
-	}
 	return r.buf.Read(p)
 }
 
