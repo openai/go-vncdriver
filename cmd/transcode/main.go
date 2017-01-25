@@ -40,10 +40,9 @@ func (e *cursorEncoding) Read(c *vncclient.ClientConn, rect *vncclient.Rectangle
 }
 
 type fbsReader struct {
+	buf       *bytes.Buffer
 	r         io.Reader
 	timestamp [4]byte
-	n         int
-	atEOF     bool
 }
 
 func (r *fbsReader) read4() ([]byte, error) {
@@ -53,35 +52,33 @@ func (r *fbsReader) read4() ([]byte, error) {
 }
 
 func (r *fbsReader) Read(p []byte) (n int, err error) {
-	if r.atEOF {
-		return 0, io.EOF
-	}
-	if r.n == 4 {
-		b, err := r.read4() // end of FBS chunk, so read timestamp
+	if r.buf == nil || r.buf.Len() == 0 {
+		// read length
+		b, err := r.read4()
+		if err != nil {
+			return 0, err
+		}
+		n := int(bytes2Uint32(b))
+
+		// read data
+		data := make([]byte, n)
+		if _, err := io.ReadFull(r.r, data); err != nil {
+			return 0, io.ErrUnexpectedEOF
+		}
+		r.buf = bytes.NewBuffer(data)
+
+		// read timestamp
+		b, err = r.read4()
 		if err != nil {
 			return 0, err
 		}
 		copy(r.timestamp[:], b)
-		r.n = 0
 	}
-	if r.n == 0 {
-		b, err := r.read4() // start of FBS chunk, so read length
-		if err != nil {
-			return 0, err
-		}
-		r.n = int(bytes2Uint32(b))
-		if r.n == 0 {
-			r.atEOF = true
-			return 0, io.EOF
-		}
-		r.n += 4 // for the timestamp bytes at the end
+
+	if len(p) > r.buf.Len() {
+		p = p[:r.buf.Len()]
 	}
-	if len(p) > r.n-4 {
-		p = p[:r.n-4]
-	}
-	n, err = r.r.Read(p)
-	r.n -= n
-	return n, err
+	return r.buf.Read(p)
 }
 
 func (r *fbsReader) Timestamp() []byte {
