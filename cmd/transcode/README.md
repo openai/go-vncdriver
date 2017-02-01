@@ -9,6 +9,7 @@ executable. The resulting image is about 6MB.
 Use the image like so:
 
 ```
+$ cd out/demo/<path-to-demos>
 $ docker run -v $(pwd):/tmp docker.openai.com/transcode -in=/tmp/server.fbs.orig -out=/tmp/transcoded.fbs
 ```
 
