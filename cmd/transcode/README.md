@@ -9,5 +9,7 @@ executable. The resulting image is about 6MB.
 Use the image like so:
 
 ```
-docker run -v volume:mount docker.openai.com/transcode -in=server.tight.fbs -out=server.raw.fbs
+$ docker run -v $(pwd):/tmp docker.openai.com/transcode -in=/tmp/server.fbs.orig -out=/tmp/transcoded.fbs
 ```
+
+It is recommended to first `mv` the tight-encoded `server.fbs` file to `server.fbs.orig` to keep track of the original demo.
