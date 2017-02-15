@@ -56,6 +56,9 @@ func (*FramebufferUpdateMessage) Read(c *ClientConn, r io.Reader) (ServerMessage
 	if err := binary.Read(r, binary.BigEndian, &numRects); err != nil {
 		return nil, err
 	}
+    if numRects > 1000 {
+        return nil, errors.Errorf("excessive rectangle count %d", int(numRects));
+    }
 
 	// Build the map of encodings supported
 	encMap := make(map[int32]Encoding)
@@ -89,6 +92,12 @@ func (*FramebufferUpdateMessage) Read(c *ClientConn, r io.Reader) (ServerMessage
 				return nil, err
 			}
 		}
+
+        // Defend against corrupt rectangles before we try to allocate memory.
+        // In the encoding readers we compute int(Width) * int(Height), which will overflow if Width*Height >= (1<<31)
+        if int(rect.X) > 5120 || int(rect.Y) > 2880 || int(rect.Width) > 5120 || int(rect.Height) > 2880 {
+            return nil, errors.Errorf("excessive rectangle origin %dx%d size %dx%d encoding %v", int(rect.X), int(rect.Y), int(rect.Width), int(rect.Height), encodingType);
+        }
 
 		enc, ok := encMap[encodingType]
 		if !ok {
