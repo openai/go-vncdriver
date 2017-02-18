@@ -12,6 +12,7 @@ import (
 	"os"
 
 	"github.com/cheggaaa/pb"
+	logging "github.com/op/go-logging"
 	"github.com/openai/go-vncdriver/vncclient"
 )
 
@@ -102,6 +103,7 @@ func (r *fbsReader) Timestamp() []byte {
 }
 
 func main() {
+	logging.SetLevel(logging.INFO, "")
 	flag.Parse()
 	if *in == "" || *out == "" {
 		flag.Usage()
