@@ -95,7 +95,7 @@ Build failed. HINT:
 ''')
 
     def build_gl():
-        cmd = 'go build -buildmode=c-shared -o go_vncdriver.so github.com/openai/go-vncdriver'
+        cmd = 'go build -ldflags=-s -buildmode=c-shared -o go_vncdriver.so github.com/openai/go-vncdriver'
         eprint('Building with OpenGL: GOPATH={} {}. (Set GO_VNCDRIVER_NOGL to build without OpenGL.)'.format(os.getenv('GOPATH'), cmd))
         return not subprocess.call(cmd.split())
 
