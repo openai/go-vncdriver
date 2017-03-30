@@ -4,3 +4,5 @@ go_vncdriver.h
 /build
 /dist
 /.build
+/*.egg-info
+__pycache__
