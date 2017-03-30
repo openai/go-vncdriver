@@ -73,7 +73,7 @@ def build():
         # at runtime. TODO(jeremy): We might want this behavior on Linux, too.
         #
         # In Darwin, ld returns an error by default on undefined symbols. Use dynamic_lookup instead.
-        ldflags = '-undefined dynamic_lookup'
+        ldflags = '-undefined dynamic_lookup -s'
     else:
         library = sysconfig.get_config_var('LIBRARY')
         match = re.search('^lib(.*)\.a', library)
