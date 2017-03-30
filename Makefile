@@ -19,4 +19,4 @@ clean:
 	rm -rf *.so *.h *~ build
 
 test:
-	python -c 'import go_vncdriver; go_vncdriver.setup(); go_vncdriver.VNCSession(["localhost:5900"])'
+	python -c 'import go_vncdriver; go_vncdriver.VNCSession()'
