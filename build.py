@@ -73,7 +73,7 @@ def build():
         # at runtime. TODO(jeremy): We might want this behavior on Linux, too.
         #
         # In Darwin, ld returns an error by default on undefined symbols. Use dynamic_lookup instead.
-        ldflags = '-undefined dynamic_lookup'
+        ldflags = '-undefined dynamic_lookup -s'
     else:
         library = sysconfig.get_config_var('LIBRARY')
         match = re.search('^lib(.*)\.a', library)
@@ -95,7 +95,7 @@ Build failed. HINT:
 ''')
 
     def build_gl():
-        cmd = 'go build -ldflags=-s -buildmode=c-shared -o go_vncdriver.so github.com/openai/go-vncdriver'
+        cmd = 'go build -buildmode=c-shared -o go_vncdriver.so github.com/openai/go-vncdriver'
         eprint('Building with OpenGL: GOPATH={} {}. (Set GO_VNCDRIVER_NOGL to build without OpenGL.)'.format(os.getenv('GOPATH'), cmd))
         return not subprocess.call(cmd.split())
 
