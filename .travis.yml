@@ -1,7 +1,10 @@
+dist: trusty
 language: python
 python:
   - "3.5"
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y golang
+  - which go
+  - sudo apt-get install python-dev
+  - sudo bash -c "curl https://storage.googleapis.com/golang/go1.8rc3.linux-amd64.tar.gz | tar -zvx -C /usr/local && ln -s /usr/local/go/bin/go /usr/bin"
+  - which go
 script: "make build test"
