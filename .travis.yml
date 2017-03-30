@@ -2,6 +2,5 @@ language: python
 python:
   - "3.5"
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y golang
+  - sudo bash -c "https://storage.googleapis.com/golang/go1.8rc3.linux-amd64.tar.gz | tar -zvx -C /usr/local && ln -s /usr/local/go/bin/go /usr/bin"
 script: "make build test"
