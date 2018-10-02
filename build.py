@@ -4,6 +4,7 @@
 
 from __future__ import print_function
 import distutils.sysconfig
+import distutils.version
 import os
 import numpy
 import re
@@ -51,8 +52,16 @@ def build():
     # to have. Also, it doesn't work on macOS.
     if not libjpg:
         try:
+            # Get ld's version number
+            output = subprocess.check_output(['ld', '-v'], stderr=subprocess.STDOUT)
+            ld_version = output.decode().split(' ')[-1]
+            # Due to ld changing --trace-symbol output format, we need to modify the index accordingly to get the correct field.
+            if distutils.version.StrictVersion(ld_version) > distutils.version.StrictVersion('2.30.51'):
+                symbol_idx = 1
+            else:
+                symbol_idx = 0
             output = subprocess.check_output(['ld', '-ljpeg', '--trace-symbol', 'jpeg_CreateDecompress', '-e', '0'], stderr=subprocess.STDOUT)
-            libjpg = output.decode().split(':')[0]
+            libjpg = output.decode().split(':')[symbol_idx]
         except (subprocess.CalledProcessError, OSError):
             raise BuildException("Could not find libjpeg. HINT: try 'sudo apt-get install libjpeg-turbo8-dev' on Ubuntu or 'brew install libjpeg-turbo' on OSX")
 
