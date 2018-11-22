@@ -1,3 +1,5 @@
+**Status:** Archive (code is provided as-is, no updates expected)
+
 # go-vncdriver
 
 A fast VNC driver.
