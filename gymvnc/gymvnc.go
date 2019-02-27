@@ -185,6 +185,9 @@ func (c *VNCSession) Close() error {
 		// we can't auto-clean it up on error.
 		c.renderer.Close()
 	}
+	c.frontScreen = nil
+	c.backScreen = nil
+	c.deferredUpdates = nil
 	return nil
 }
 
