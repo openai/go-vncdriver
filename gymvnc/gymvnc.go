@@ -346,8 +346,9 @@ func (c *VNCSession) applyRect(conn *vncclient.ClientConn, rect vncclient.Rectan
 		screenEnd := screenStart + uint32(rect.Width)
 
 		bytes += encEnd - encStart
-
-		copy(c.backScreen.Data[screenStart:screenEnd], colors[encStart:encEnd])
+		if c.backScreen != nil {
+			copy(c.backScreen.Data[screenStart:screenEnd], colors[encStart:encEnd])
+		}
 		// wg.Done()
 		// }(y)
 	}
