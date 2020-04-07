@@ -56,9 +56,6 @@ func (*FramebufferUpdateMessage) Read(c *ClientConn, r io.Reader) (ServerMessage
 	if err := binary.Read(r, binary.BigEndian, &numRects); err != nil {
 		return nil, err
 	}
-    if numRects > 2000 {
-        return nil, errors.Errorf("excessive rectangle count %d", int(numRects));
-    }
 
 	// Build the map of encodings supported
 	encMap := make(map[int32]Encoding)
